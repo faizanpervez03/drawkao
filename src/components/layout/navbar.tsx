@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { List, X } from "@phosphor-icons/react";
+import { usePathname, useRouter } from "next/navigation";
+import { List, X, SignOut, User } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { createClient } from "@/lib/supabase/client";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -18,6 +19,34 @@ const navLinks = [
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const [userName, setUserName] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [supabase] = useState(() => createClient());
+
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const name = user.user_metadata?.full_name
+          || user.user_metadata?.name
+          || user.email?.split("@")[0]
+          || "";
+        setUserName(name);
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+    }
+    checkUser();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsLoggedIn(false);
+    setUserName("");
+    router.push("/");
+  };
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -29,15 +58,8 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-[5rem] items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center shrink-0">
-            <Image
-              src="/images/DrawKao_Logo.png"
-              alt="Draw Kao"
-              width={280}
-              height={80}
-              className="h-18 w-auto"
-              priority
-            />
+          <Link href="/" className="flex items-center gap-3 shrink-0">
+            <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={140} height={45} className="h-11 w-auto" priority />
           </Link>
 
           {/* Desktop Nav */}
@@ -48,29 +70,23 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative text-[15px] font-medium px-4 py-2 rounded-full transition-colors group ${
-                    active
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground"
+                  className={`relative text-[15px] font-medium px-4 py-2 rounded-full transition-colors ${
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                   }`}
                 >
                   {link.label}
-                  <svg
-                    className={`absolute -bottom-1 left-1/2 -translate-x-1/2 h-3 transition-all duration-300 ${
-                      active ? "w-[calc(100%-16px)]" : "w-0 group-hover:w-[calc(100%-16px)]"
-                    }`}
-                    viewBox="0 0 100 16"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M0 10C15 4 25 12 40 6C55 0 65 14 80 8C90 4 95 10 100 8"
-                      stroke="currentColor"
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      className={active ? "text-primary" : "text-accent/70"}
-                      fill="none"
-                    />
-                  </svg>
+                  {active && (
+                    <svg className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2" viewBox="0 0 32 8" fill="none">
+                      <path
+                        d="M2 6C6 2 12 2 16 4C20 6 26 2 30 2"
+                        stroke="currentColor"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        className="text-accent"
+                        fill="none"
+                      />
+                    </svg>
+                  )}
                 </Link>
               );
             })}
@@ -78,19 +94,42 @@ export function Navbar() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/parent/auth"
-              className="text-[15px] font-medium text-muted-foreground hover:text-foreground px-4 py-2 rounded-full hover:bg-secondary transition-colors"
-            >
-              For Parents
-            </Link>
             <ThemeToggle />
-            <Link
-              href="/parent/auth"
-              className="inline-flex items-center bg-accent text-white hover:bg-accent/90 text-[15px] font-bold px-6 py-2.5 rounded-full shadow-[0_4px_14px_rgba(245,166,35,0.3)] hover:shadow-[0_6px_20px_rgba(245,166,35,0.4)] transition-all"
-            >
-              Get Started
-            </Link>
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/parent/dashboard"
+                  className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
+                >
+                  <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{userName.charAt(0).toUpperCase()}</span>
+                  </div>
+                  {userName}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="h-9 w-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                  title="Sign out"
+                >
+                  <SignOut className="h-4 w-4 text-gray-600" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/parent/auth"
+                  className="text-[15px] font-medium text-muted-foreground hover:text-foreground px-4 py-2 rounded-full hover:bg-secondary transition-colors"
+                >
+                  For Parents
+                </Link>
+                <Link
+                  href="/parent/auth"
+                  className="inline-flex items-center bg-accent text-white hover:bg-accent/90 text-[15px] font-bold px-6 py-2.5 rounded-full shadow-[0_4px_14px_rgba(245,166,35,0.3)] hover:shadow-[0_6px_20px_rgba(245,166,35,0.4)] transition-all"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -124,46 +163,54 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative block text-[15px] font-medium py-3 px-4 rounded-xl transition-colors group ${
-                      active
-                        ? "text-primary bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
                     onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-colors ${
+                      active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary"
+                    }`}
                   >
                     {link.label}
-                    <svg
-                      className={`absolute bottom-1 left-4 h-2.5 transition-all duration-300 ${
-                        active ? "w-[calc(100%-32px)]" : "w-0 group-hover:w-[calc(100%-32px)]"
-                      }`}
-                      viewBox="0 0 100 16"
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M0 10C15 4 25 12 40 6C55 0 65 14 80 8C90 4 95 10 100 8"
-                        stroke="currentColor"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        className={active ? "text-primary" : "text-accent/70"}
-                        fill="none"
-                      />
-                    </svg>
                   </Link>
                 );
               })}
               <div className="pt-3 border-t border-border space-y-2 mt-2">
-                <Link
-                  href="/parent/auth"
-                  className="block text-center text-[15px] text-muted-foreground py-3 rounded-full hover:bg-secondary transition-colors"
-                >
-                  For Parents
-                </Link>
-                <Link
-                  href="/parent/auth"
-                  className="block text-center bg-accent text-white text-[15px] font-bold py-3 rounded-full shadow-md"
-                >
-                  Get Started
-                </Link>
+                {isLoggedIn ? (
+                  <>
+                    <Link
+                      href="/parent/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 text-center text-[15px] font-medium text-green-700 py-3 rounded-full bg-green-50 px-4"
+                    >
+                      <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center">
+                        <span className="text-xs font-bold text-white">{userName.charAt(0).toUpperCase()}</span>
+                      </div>
+                      {userName}
+                    </Link>
+                    <button
+                      onClick={() => { handleLogout(); setMobileOpen(false); }}
+                      className="w-full flex items-center justify-center gap-2 text-center text-[15px] text-gray-500 py-3 rounded-full hover:bg-secondary"
+                    >
+                      <SignOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/parent/auth"
+                      onClick={() => setMobileOpen(false)}
+                      className="block text-center text-[15px] text-muted-foreground py-3 rounded-full hover:bg-secondary transition-colors"
+                    >
+                      For Parents
+                    </Link>
+                    <Link
+                      href="/parent/auth"
+                      onClick={() => setMobileOpen(false)}
+                      className="block text-center bg-accent text-white text-[15px] font-bold py-3 rounded-full shadow-md"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
