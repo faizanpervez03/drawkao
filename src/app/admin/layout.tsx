@@ -1,0 +1,238 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  House,
+  BookOpen,
+  PencilLine,
+  SquaresFour,
+  Image as ImageIcon,
+  Users,
+  ChartLineUp,
+  Gear,
+  List,
+  X,
+  ArrowLeft,
+  Bell,
+  MagnifyingGlass,
+  User,
+  SignOut,
+  ListChecks,
+} from "@phosphor-icons/react";
+
+const navSections = [
+  {
+    title: "OVERVIEW",
+    items: [
+      { label: "Dashboard", href: "/admin/dashboard", icon: House },
+    ],
+  },
+  {
+    title: "CONTENT",
+    items: [
+      { label: "Lessons", href: "/admin/lessons", icon: BookOpen },
+      { label: "Drawing Steps", href: "/admin/drawing-steps", icon: PencilLine },
+      { label: "Categories", href: "/admin/categories", icon: SquaresFour },
+      { label: "Media Library", href: "/admin/media", icon: ImageIcon },
+    ],
+  },
+  {
+    title: "USERS & PROGRESS",
+    items: [
+      { label: "Parents", href: "/admin/parents", icon: Users },
+      { label: "Learning Progress", href: "/admin/progress", icon: ChartLineUp },
+    ],
+  },
+  {
+    title: "SYSTEM",
+    items: [
+      { label: "Settings", href: "/admin/settings", icon: Gear },
+    ],
+  },
+];
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <div className="flex h-screen bg-[#f8f7f4]">
+      {/* Sidebar - Desktop */}
+      <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 shrink-0">
+        <div className="p-5 border-b border-gray-100">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/images/DrawKao_Logo.png"
+              alt="Draw Kao"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
+            />
+            <span className="text-[10px] font-bold text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full uppercase tracking-wider">Admin</span>
+          </Link>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          {navSections.map((section) => (
+            <div key={section.title} className="mb-6">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">{section.title}</p>
+              {section.items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5 ${
+                      isActive
+                        ? "bg-green-600 text-white shadow-md"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" weight={isActive ? "fill" : "regular"} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="p-3 border-t border-gray-100">
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-all"
+          >
+            <span className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center text-xs font-bold text-green-700">
+              <ListChecks className="h-4 w-4" />
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-700">Child App Preview</p>
+            </div>
+            <ArrowLeft className="h-4 w-4 text-gray-400" />
+          </Link>
+          <div className="flex items-center gap-3 px-3 py-2.5 mt-1">
+            <span className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center text-xs font-bold text-white">E</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">Admin</p>
+              <p className="text-xs text-gray-400 truncate">Platform Manager</p>
+            </div>
+            <SignOut className="h-4 w-4 text-gray-400 shrink-0" />
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: "spring", damping: 25 }}
+              className="fixed left-0 top-0 bottom-0 w-64 bg-white z-50 lg:hidden flex flex-col"
+            >
+              <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-3">
+                  <Image
+                    src="/images/DrawKao_Logo.png"
+                    alt="Draw Kao"
+                    width={120}
+                    height={40}
+                    className="h-10 w-auto"
+                  />
+                </Link>
+                <button onClick={() => setSidebarOpen(false)} className="h-8 w-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto py-4 px-3">
+                {navSections.map((section) => (
+                  <div key={section.title} className="mb-6">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">{section.title}</p>
+                    {section.items.map((item) => {
+                      const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5 ${
+                            isActive
+                              ? "bg-green-600 text-white shadow-md"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" weight={isActive ? "fill" : "regular"} />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ))}
+              </nav>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Admin Header */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-4 sm:px-6 shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden h-10 w-10 rounded-xl hover:bg-gray-100 flex items-center justify-center mr-3"
+          >
+            <List className="h-5 w-5 text-gray-600" />
+          </button>
+
+          <div className="flex-1 flex items-center gap-3 max-w-xl">
+            <div className="flex-1 relative">
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search lessons, prompts, parent accounts..."
+                className="w-full h-10 pl-10 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all"
+              />
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">⌘K</kbd>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 ml-4">
+            <Link
+              href="/"
+              className="hidden sm:flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-4 py-2 rounded-full transition-colors"
+            >
+              Launch Learner Canvas
+            </Link>
+            <button className="relative h-10 w-10 rounded-xl hover:bg-gray-100 flex items-center justify-center">
+              <Bell className="h-5 w-5 text-gray-600" />
+              <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full" />
+            </button>
+            <button className="h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
+              <User className="h-5 w-5 text-white" weight="fill" />
+            </button>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
