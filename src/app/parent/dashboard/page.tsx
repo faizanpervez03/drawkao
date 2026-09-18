@@ -251,31 +251,13 @@ export default function ParentDashboardPage() {
     <div className="flex h-screen bg-[#faf9f6]">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-56 bg-white border-r border-gray-200 shrink-0">
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-100 flex justify-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={100} height={32} className="h-8 w-auto" />
+            <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={120} height={40} className="h-10 w-auto" />
           </Link>
         </div>
 
-        <div className="p-3 border-b border-gray-100">
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-green-700">{childName.charAt(0).toUpperCase()}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">{childName}</p>
-                <p className="text-[10px] text-gray-500">{stats.lessonsDone} lessons done</p>
-              </div>
-              <CaretDown className="h-3.5 w-3.5 text-gray-400" />
-            </div>
-          </div>
-          <button className="w-full mt-2 text-xs font-semibold text-green-600 hover:text-green-700 flex items-center justify-center gap-1 py-1.5">
-            <Plus className="h-3 w-3" /> Add Child
-          </button>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto py-2 px-2">
+        <nav className="flex-1 overflow-y-auto py-3 px-2">
           {navItems.map((item) => (
             <button
               key={item.label}
@@ -322,7 +304,7 @@ export default function ParentDashboardPage() {
                 <X className="h-4 w-4 text-gray-500" />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto py-2 px-2">
+            <nav className="flex-1 overflow-y-auto py-3 px-2">
               {navItems.map((item) => (
                 <button key={item.label} onClick={() => { setActiveNav(item.label); setSidebarOpen(false); }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 text-left ${
