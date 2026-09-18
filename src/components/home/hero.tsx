@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Sparkle } from "@phosphor-icons/react";
-import CursorTrackingWrapper from "@/components/cursor-tracking-wrapper";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -135,17 +134,15 @@ export function Hero() {
             className="relative flex justify-center lg:justify-end"
           >
             <div className="relative w-full max-w-lg">
-              {/* Original character with cursor tracking */}
-              <CursorTrackingWrapper className="relative">
-                <Image
-                  src="/images/kid_hero_img.png"
-                  alt="Child drawing and learning with Draw Kao"
-                  width={600}
-                  height={500}
-                  className="w-full h-auto"
-                  priority
-                />
-              </CursorTrackingWrapper>
+              {/* Character */}
+              <Image
+                src="/images/kid_hero_img.png"
+                alt="Child drawing and learning with Draw Kao"
+                width={600}
+                height={500}
+                className="w-full h-auto"
+                priority
+              />
 
               {/* Floating Apple */}
               <motion.div
