@@ -14,9 +14,70 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Draw Kao — Learn Through Drawing",
+  metadataBase: new URL("https://drawkao.vercel.app"),
+  title: {
+    default: "Draw Kao — Learn Through Drawing for Kids",
+    template: "%s | Draw Kao",
+  },
   description:
-    "Draw Kao helps children learn letters, words, fruits, animals, shapes and more — one drawing at a time.",
+    "Draw Kao helps children ages 4-8 learn letters, words, fruits, animals, shapes, numbers and more through fun drawing activities. Free educational platform for kids.",
+  keywords: [
+    "kids learning app",
+    "children education",
+    "learn to draw",
+    "alphabet for kids",
+    "drawing for children",
+    "educational app",
+    "kids activities",
+    "learn letters",
+    "fruits for kids",
+    "animals for kids",
+    "shapes for kids",
+    "early childhood education",
+    "pre-school learning",
+    "interactive learning",
+  ],
+  authors: [{ name: "Draw Kao" }],
+  creator: "Draw Kao",
+  publisher: "Draw Kao",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://drawkao.vercel.app",
+    siteName: "Draw Kao",
+    title: "Draw Kao — Learn Through Drawing for Kids",
+    description:
+      "Help your child learn letters, words, fruits, animals, shapes and more through fun drawing activities. Designed for ages 4-8.",
+    images: [
+      {
+        url: "/images/DrawKao_Logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Draw Kao - Learn Through Drawing",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Draw Kao — Learn Through Drawing for Kids",
+    description:
+      "Help your child learn letters, words, fruits, animals, shapes and more through fun drawing activities.",
+    images: ["/images/DrawKao_Logo.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://drawkao.vercel.app",
+  },
 };
 
 export default function RootLayout({
