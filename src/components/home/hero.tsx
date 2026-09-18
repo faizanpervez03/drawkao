@@ -59,12 +59,12 @@ export function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background" id="learn">
+    <section className="relative overflow-hidden bg-background pb-4 sm:pb-6 lg:pb-8" id="learn">
       {/* Soft background blobs */}
       <div className="absolute top-0 left-[8%] h-80 w-80 rounded-full bg-primary/10 blur-[100px]" />
       <div className="absolute bottom-0 right-[5%] h-64 w-64 rounded-full bg-accent/10 blur-[100px]" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-12 sm:pb-16 lg:pb-20">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 lg:pt-14 pb-4 sm:pb-6 lg:pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-6 items-center">
           {/* Text side */}
           <div className="space-y-6 text-center lg:text-left">
