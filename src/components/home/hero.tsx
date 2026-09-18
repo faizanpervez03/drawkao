@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, Play, Sparkle } from "@phosphor-icons/react";
+import CursorTrackingCharacter from "@/components/cursor-tracking-character";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -158,26 +159,15 @@ export function Hero() {
             variants={scaleIn}
             className="relative flex justify-center lg:justify-end"
           >
-            <div
-              className="relative w-full max-w-lg"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              style={{ perspective: 800 }}
-            >
-              {/* Main illustration with tilt */}
-              <motion.div
-                className="relative rounded-[2rem] overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10"
-                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-              >
-                <Image
-                  src="/images/kid_hero_img.png"
-                  alt="Child drawing and learning with Draw Kao"
-                  width={600}
-                  height={500}
-                  className="w-full h-auto"
-                  priority
-                />
-              </motion.div>
+            <div className="relative w-full max-w-lg">
+              {/* Cursor Tracking Character */}
+              <CursorTrackingCharacter
+                imageUrl="/images/cursor tracking.png"
+                altText="Draw Kao Character"
+                maxSize={500}
+                smoothingStrength={0.12}
+                className="w-full h-[400px] sm:h-[450px] lg:h-[500px]"
+              />
 
               {/* Floating Apple */}
               <motion.div
