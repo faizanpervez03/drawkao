@@ -1,10 +1,42 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Star } from "@phosphor-icons/react";
 
 const lessons = [
-  { letter: "A", word: "Apple", emoji: "🍎", color: "#e57373" },
-  { letter: "B", word: "Ball", emoji: "⚽", color: "#5c9ce6" },
-  { letter: "C", word: "Cat", emoji: "🐱", color: "#f5a623" },
-  { letter: "D", word: "Dog", emoji: "🐶", color: "#2e7d32" },
+  {
+    letter: "A",
+    word: "Apple",
+    image: "https://images.unsplash.com/photo-1568702846914-96b305d2ead1?w=400&h=400&fit=crop&q=80",
+    color: "#e57373",
+    categoryId: "alphabet",
+    slug: "a",
+  },
+  {
+    letter: "B",
+    word: "Ball",
+    image: "https://images.unsplash.com/photo-1518668701915-1d27e93a8402?w=400&h=400&fit=crop&q=80",
+    color: "#5c9ce6",
+    categoryId: "alphabet",
+    slug: "b",
+  },
+  {
+    letter: "C",
+    word: "Cat",
+    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=80",
+    color: "#f5a623",
+    categoryId: "alphabet",
+    slug: "c",
+  },
+  {
+    letter: "D",
+    word: "Dog",
+    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop&q=80",
+    color: "#2e7d32",
+    categoryId: "alphabet",
+    slug: "d",
+  },
 ];
 
 export function FeaturedLessons() {
@@ -22,18 +54,22 @@ export function FeaturedLessons() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-5">
           {lessons.map((lesson) => (
-            <button
+            <Link
               key={lesson.letter}
-              className="group relative bg-background hover:bg-card border-2 border-border hover:border-primary/30 rounded-[1.25rem] p-6 text-center transition-all duration-200 hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5"
+              href={`/learn/${lesson.categoryId}/${lesson.slug}/draw`}
+              className="group relative bg-background hover:bg-background border-2 border-border hover:border-primary/30 rounded-[1.25rem] p-6 text-center transition-all duration-200 hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:-translate-y-0.5"
             >
               <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Star className="h-4 w-4 text-accent" weight="fill" />
               </div>
-              <div
-                className="inline-flex h-20 w-20 items-center justify-center rounded-2xl mb-3 text-3xl transition-transform group-hover:scale-110"
-                style={{ backgroundColor: `${lesson.color}15` }}
-              >
-                {lesson.emoji}
+              <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl mb-3 overflow-hidden transition-transform group-hover:scale-110">
+                <Image
+                  src={lesson.image}
+                  alt={lesson.word}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <p className="font-bold text-foreground text-lg">
                 {lesson.letter} — {lesson.word}
@@ -45,14 +81,17 @@ export function FeaturedLessons() {
                 Start Lesson
                 <ArrowRight className="h-3.5 w-3.5" weight="bold" />
               </div>
-            </button>
+            </Link>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <button className="inline-flex items-center justify-center border-2 border-border text-muted-foreground hover:bg-secondary hover:border-border rounded-full px-8 py-2.5 font-semibold transition-all">
+          <Link
+            href="/learn"
+            className="inline-flex items-center justify-center border-2 border-border text-muted-foreground hover:bg-secondary hover:border-border rounded-full px-8 py-2.5 font-semibold transition-all"
+          >
             View All Lessons
-          </button>
+          </Link>
         </div>
       </div>
     </section>
