@@ -170,7 +170,7 @@ export function Hero() {
                 style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
               >
                 <Image
-                  src="/images/hero_section_img.png"
+                  src="/images/kid_hero_img.png"
                   alt="Child drawing and learning with Draw Kao"
                   width={600}
                   height={500}
