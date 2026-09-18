@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowRight, Play, Sparkle } from "@phosphor-icons/react";
-import CursorTrackingCharacter from "@/components/cursor-tracking-character";
+import CursorTrackingWrapper from "@/components/cursor-tracking-wrapper";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -34,31 +34,6 @@ const floatBadge = {
 };
 
 export function Hero() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), {
-    stiffness: 120,
-    damping: 15,
-  });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-15, 15]), {
-    stiffness: 120,
-    damping: 15,
-  });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
   return (
     <section className="relative overflow-hidden bg-background pb-4 sm:pb-6 lg:pb-8" id="learn">
       {/* Soft background blobs */}
@@ -160,14 +135,17 @@ export function Hero() {
             className="relative flex justify-center lg:justify-end"
           >
             <div className="relative w-full max-w-lg">
-              {/* Cursor Tracking Character */}
-              <CursorTrackingCharacter
-                imageUrl="/images/cursor tracking.png"
-                altText="Draw Kao Character"
-                maxSize={500}
-                smoothingStrength={0.12}
-                className="w-full h-[400px] sm:h-[450px] lg:h-[500px]"
-              />
+              {/* Original character with cursor tracking */}
+              <CursorTrackingWrapper className="relative">
+                <Image
+                  src="/images/kid_hero_img.png"
+                  alt="Child drawing and learning with Draw Kao"
+                  width={600}
+                  height={500}
+                  className="w-full h-auto"
+                  priority
+                />
+              </CursorTrackingWrapper>
 
               {/* Floating Apple */}
               <motion.div
