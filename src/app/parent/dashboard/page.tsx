@@ -39,10 +39,8 @@ import {
   ListDashes,
   ChartBar,
   Timer,
-  Sun,
-  Moon,
-  ToggleRight,
 } from "@phosphor-icons/react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -220,8 +218,8 @@ export default function ParentDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-4 border-green-500 border-t-transparent animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -248,10 +246,10 @@ export default function ParentDashboardPage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#faf9f6]">
+    <div className="flex h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-56 bg-white border-r border-gray-200 shrink-0">
-        <div className="p-4 border-b border-gray-100 flex justify-center">
+      <aside className="hidden lg:flex flex-col w-56 bg-card border-r border-border shrink-0">
+        <div className="p-4 border-b border-border flex justify-center">
           <Link href="/" className="flex items-center gap-2 group">
             <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={120} height={40} className="h-10 w-auto" />
           </Link>
@@ -264,8 +262,8 @@ export default function ParentDashboardPage() {
               onClick={() => setActiveNav(item.label)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 text-left ${
                 activeNav === item.label
-                  ? "bg-green-50 text-green-700"
-                  : "text-gray-600 hover:bg-gray-50"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary"
               }`}
             >
               <item.icon className="h-4 w-4" weight={activeNav === item.label ? "fill" : "regular"} />
@@ -274,19 +272,19 @@ export default function ParentDashboardPage() {
           ))}
         </nav>
 
-        <div className="p-2 border-t border-gray-100 space-y-1">
-          <Link href="/learn" className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-2 rounded-lg transition-colors text-sm">
+        <div className="p-2 border-t border-border space-y-1">
+          <Link href="/learn" className="flex items-center gap-2 bg-accent hover:bg-accent/90 text-white font-bold px-3 py-2 rounded-lg transition-colors text-sm">
             <PencilLine className="h-4 w-4" weight="fill" />
             Draw
           </Link>
           <div className="flex items-center gap-2 px-2 py-1.5">
-            <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center shrink-0">
+            <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center shrink-0">
               <span className="text-[10px] font-bold text-white">{userInitial}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-800 truncate">{userName}</p>
+              <p className="text-xs font-semibold text-foreground truncate">{userName}</p>
             </div>
-            <button onClick={handleLogout} className="text-gray-400 hover:text-red-500 transition-colors" title="Sign out">
+            <button onClick={handleLogout} className="text-muted-foreground hover:text-red-500 transition-colors" title="Sign out">
               <SignOut className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -297,30 +295,30 @@ export default function ParentDashboardPage() {
       {sidebarOpen && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
-          <aside className="fixed left-0 top-0 bottom-0 w-56 bg-white z-50 lg:hidden flex flex-col">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+          <aside className="fixed left-0 top-0 bottom-0 w-56 bg-card z-50 lg:hidden flex flex-col">
+            <div className="p-4 border-b border-border flex items-center justify-between">
               <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={100} height={32} className="h-8 w-auto" />
-              <button onClick={() => setSidebarOpen(false)} className="h-7 w-7 rounded-lg hover:bg-gray-100 flex items-center justify-center">
-                <X className="h-4 w-4 text-gray-500" />
+              <button onClick={() => setSidebarOpen(false)} className="h-7 w-7 rounded-lg hover:bg-secondary flex items-center justify-center">
+                <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto py-3 px-2">
               {navItems.map((item) => (
                 <button key={item.label} onClick={() => { setActiveNav(item.label); setSidebarOpen(false); }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 text-left ${
-                    activeNav === item.label ? "bg-green-50 text-green-700" : "text-gray-600 hover:bg-gray-50"
+                    activeNav === item.label ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-secondary"
                   }`}>
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </button>
               ))}
             </nav>
-            <div className="p-2 border-t border-gray-100">
-              <Link href="/" className="flex items-center gap-2 text-sm text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-lg mb-1">
+            <div className="p-2 border-t border-border">
+              <Link href="/" className="flex items-center gap-2 text-sm text-muted-foreground hover:bg-secondary px-3 py-2 rounded-lg mb-1">
                 <House className="h-4 w-4" />
                 Back to Home
               </Link>
-              <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-500 hover:bg-red-50 px-3 py-2 rounded-lg">
+              <button onClick={handleLogout} className="w-full flex items-center gap-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 px-3 py-2 rounded-lg">
                 <SignOut className="h-4 w-4" />
                 Sign Out
               </button>
@@ -330,29 +328,34 @@ export default function ParentDashboardPage() {
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-background">
         {/* Top Bar */}
-        <header className="h-12 bg-white border-b border-gray-200 flex items-center px-4 shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden h-8 w-8 rounded-lg hover:bg-gray-100 flex items-center justify-center mr-2">
-            <List className="h-4 w-4 text-gray-600" />
+        <header className="h-12 bg-card border-b border-border flex items-center px-3 sm:px-4 shrink-0 gap-2">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden h-8 w-8 rounded-lg hover:bg-secondary flex items-center justify-center shrink-0">
+            <List className="h-4 w-4 text-muted-foreground" />
           </button>
 
-          <Link href="/" className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-green-600 transition-colors mr-2">
+          <Link href="/" className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors shrink-0">
             <CaretLeft className="h-3.5 w-3.5" />
             Back to Home
           </Link>
 
-          <div className="flex-1 flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="text-gray-300">/</span>
-            <span>Parent Portal</span>
-            <CaretRight className="h-3 w-3" />
-            <span className="font-semibold text-gray-700">{activeNav}</span>
+          <Link href="/" className="sm:hidden h-8 w-8 rounded-lg hover:bg-secondary flex items-center justify-center shrink-0">
+            <House className="h-4 w-4 text-muted-foreground" />
+          </Link>
+
+          <div className="flex-1 flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 overflow-hidden">
+            <span className="text-gray-300 hidden sm:inline">/</span>
+            <span className="hidden sm:inline">Parent Portal</span>
+            <span className="hidden sm:inline"><CaretRight className="h-3 w-3" /></span>
+            <span className="font-semibold text-foreground truncate">{activeNav}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-600 transition-colors bg-gray-50 hover:bg-green-50 px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 shrink-0">
+            <ThemeToggle />
+            <Link href="/" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-primary transition-colors bg-secondary hover:bg-primary/10 px-3 py-1.5 rounded-full">
               <House className="h-3 w-3" />
-              Home
+              <span className="hidden sm:inline">Home</span>
             </Link>
           </div>
         </header>
@@ -384,8 +387,8 @@ function OverviewContent({ userName, childName, stats, recommendedLessons, lesso
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Welcome back, {userName}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Here&apos;s what {childName} is working on today.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Welcome back, {userName}</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Here&apos;s what {childName} is working on today.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
@@ -406,22 +409,22 @@ function OverviewContent({ userName, childName, stats, recommendedLessons, lesso
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-card border border-border rounded-xl p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-gray-900">Today&apos;s Drawing Path</h2>
-          <span className="text-[10px] text-gray-400">Level {Math.floor(stats.lessonsDone / 10) + 1}</span>
+          <h2 className="text-sm font-bold text-foreground">Today&apos;s Drawing Path</h2>
+          <span className="text-[10px] text-muted-foreground">Level {Math.floor(stats.lessonsDone / 10) + 1}</span>
         </div>
         {recommendedLessons.length > 0 ? (
           <div className="space-y-2">
             {recommendedLessons.map((lesson, i) => (
               <Link key={i} href={`/learn/${lesson.categoryId}/${lesson.slug}/draw`}
-                className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                className="flex items-center gap-3 p-2.5 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors group">
                 <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${
-                  lesson.status === "done" ? "bg-purple-500" : lesson.status === "in_progress" ? "bg-orange-500" : "bg-green-500"
+                  lesson.status === "done" ? "bg-purple-500" : lesson.status === "in_progress" ? "bg-accent" : "bg-green-500"
                 }`}>{i + 1}</div>
-                <span className="text-sm font-medium text-gray-800 flex-1 truncate">{lesson.label}</span>
+                <span className="text-sm font-medium text-foreground flex-1 truncate">{lesson.label}</span>
                 {lesson.status === "done" ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Done</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">Done</span>
                 ) : lesson.status === "in_progress" ? (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">In Progress</span>
                 ) : (
@@ -432,42 +435,42 @@ function OverviewContent({ userName, childName, stats, recommendedLessons, lesso
           </div>
         ) : (
           <div className="text-center py-6">
-            <p className="text-sm text-gray-400 mb-2">No lessons started yet!</p>
-            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Learning<ArrowRight className="h-3 w-3" /></Link>
+            <p className="text-sm text-muted-foreground mb-2">No lessons started yet!</p>
+            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Learning<ArrowRight className="h-3 w-3" /></Link>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-gray-900">Screen Time</h2>
+            <h2 className="text-sm font-bold text-foreground">Screen Time</h2>
             <span className="text-xs text-green-600 font-medium">{stats.lessonsDone * 5} min</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
+            <div className="flex-1 bg-secondary/50 rounded-lg h-2">
               <div className="bg-green-500 h-2 rounded-full" style={{ width: `${Math.min(stats.lessonsDone * 5, 60)}%` }} />
             </div>
-            <span className="text-[10px] text-gray-400">60 min limit</span>
+            <span className="text-[10px] text-muted-foreground">60 min limit</span>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-gray-900">Recent Activity</h2>
-            {recentActivity.length > 0 && <Link href="#" onClick={() => {}} className="text-[10px] font-semibold text-gray-400 hover:text-green-600">View All</Link>}
+            <h2 className="text-sm font-bold text-foreground">Recent Activity</h2>
+            {recentActivity.length > 0 && <Link href="#" onClick={() => {}} className="text-[10px] font-semibold text-muted-foreground hover:text-green-600">View All</Link>}
           </div>
           {recentActivity.length > 0 ? (
             <div className="space-y-1.5">
               {recentActivity.slice(0, 3).map((a) => (
                 <div key={a.id} className="flex items-center gap-2">
                   <span className="text-lg">{a.emoji}</span>
-                  <span className="text-xs font-medium text-gray-700 flex-1 truncate">{a.label}</span>
+                  <span className="text-xs font-medium text-foreground flex-1 truncate">{a.label}</span>
                   <div className="flex items-center gap-0.5">{Array.from({ length: a.stars }).map((_, i) => <Star key={i} className="h-2.5 w-2.5 text-amber-400" weight="fill" />)}</div>
                 </div>
               ))}
             </div>
-          ) : <p className="text-xs text-gray-400 text-center py-2">No activity yet</p>}
+          ) : <p className="text-xs text-muted-foreground text-center py-2">No activity yet</p>}
         </div>
       </div>
     </>
@@ -488,8 +491,8 @@ function ChildWorkContent({ lessons, filterStatus, setFilterStatus, viewMode, se
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Child Work</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Track {`child's`} progress across all lessons.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Child Work</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Track {`child's`} progress across all lessons.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
@@ -507,17 +510,17 @@ function ChildWorkContent({ lessons, filterStatus, setFilterStatus, viewMode, se
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-card border border-border rounded-xl p-4 mb-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Funnel className="h-4 w-4 text-gray-400" />
-            <span className="text-xs font-medium text-gray-600">{lessons.length} lessons</span>
+            <Funnel className="h-4 w-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">{lessons.length} lessons</span>
           </div>
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
-            <button onClick={() => setViewMode("grid")} className={`p-1.5 rounded-md transition-colors ${viewMode === "grid" ? "bg-white shadow-sm text-green-600" : "text-gray-400 hover:text-gray-600"}`}>
+          <div className="flex items-center gap-1 bg-secondary rounded-lg p-0.5">
+            <button onClick={() => setViewMode("grid")} className={`p-1.5 rounded-md transition-colors ${viewMode === "grid" ? "bg-white shadow-sm text-green-600" : "text-muted-foreground hover:text-foreground"}`}>
               <GridFour className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-white shadow-sm text-green-600" : "text-gray-400 hover:text-gray-600"}`}>
+            <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-white shadow-sm text-green-600" : "text-muted-foreground hover:text-foreground"}`}>
               <ListDashes className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -525,24 +528,24 @@ function ChildWorkContent({ lessons, filterStatus, setFilterStatus, viewMode, se
 
         {lessons.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-sm text-gray-400 mb-2">No lessons found</p>
-            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Learning</Link>
+            <p className="text-sm text-muted-foreground mb-2">No lessons found</p>
+            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Learning</Link>
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {lessons.map((lesson) => (
               <Link key={lesson.id} href={`/learn/${lesson.category_id}/${lesson.slug}/draw`}
-                className="bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors text-center group">
+                className="bg-secondary/50 rounded-xl p-3 hover:bg-secondary transition-colors text-center group">
                 <span className="text-3xl block mb-2">{lesson.emoji}</span>
-                <p className="text-xs font-bold text-gray-800 truncate">{lesson.label}</p>
-                <p className="text-[10px] text-gray-400 mb-2">{lesson.category}</p>
+                <p className="text-xs font-bold text-foreground truncate">{lesson.label}</p>
+                <p className="text-[10px] text-muted-foreground mb-2">{lesson.category}</p>
                 {lesson.completed ? (
                   <div className="flex items-center justify-center gap-0.5">
                     {Array.from({ length: lesson.stars }).map((_, i) => <Star key={i} className="h-3 w-3 text-amber-400" weight="fill" />)}
-                    {Array.from({ length: 3 - lesson.stars }).map((_, i) => <Star key={i} className="h-3 w-3 text-gray-200" />)}
+                    {Array.from({ length: 3 - lesson.stars }).map((_, i) => <Star key={i} className="h-3 w-3 text-border" />)}
                   </div>
                 ) : (
-                  <span className="text-[10px] font-medium text-gray-400">Not started</span>
+                  <span className="text-[10px] font-medium text-muted-foreground">Not started</span>
                 )}
               </Link>
             ))}
@@ -551,11 +554,11 @@ function ChildWorkContent({ lessons, filterStatus, setFilterStatus, viewMode, se
           <div className="space-y-1">
             {lessons.map((lesson) => (
               <Link key={lesson.id} href={`/learn/${lesson.category_id}/${lesson.slug}/draw`}
-                className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                className="flex items-center gap-3 p-2.5 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors">
                 <span className="text-2xl">{lesson.emoji}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{lesson.label}</p>
-                  <p className="text-[10px] text-gray-400">{lesson.category}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{lesson.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{lesson.category}</p>
                 </div>
                 {lesson.completed ? (
                   <div className="flex items-center gap-1">
@@ -563,7 +566,7 @@ function ChildWorkContent({ lessons, filterStatus, setFilterStatus, viewMode, se
                     <div className="flex items-center gap-0.5">{Array.from({ length: lesson.stars }).map((_, i) => <Star key={i} className="h-3 w-3 text-amber-400" weight="fill" />)}</div>
                   </div>
                 ) : (
-                  <span className="text-[10px] font-medium text-gray-400 flex items-center gap-1"><Clock className="h-3 w-3" /> Not started</span>
+                  <span className="text-[10px] font-medium text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Not started</span>
                 )}
               </Link>
             ))}
@@ -588,81 +591,81 @@ function ScreenTimeContent({ screenTime, setScreenTime, eyeRestMins, setEyeRestM
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Screen Time</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Monitor and manage {`child's`} learning time.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Screen Time</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Monitor and manage {`child's`} learning time.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
+      <div className="bg-card border border-border rounded-xl p-5 mb-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-3xl font-extrabold text-gray-900">{screenTime.daily}<span className="text-sm font-normal text-gray-500 ml-1">min today</span></p>
-            <p className="text-xs text-gray-400 mt-1">Daily limit: {screenTime.limit} min</p>
+            <p className="text-3xl font-extrabold text-foreground">{screenTime.daily}<span className="text-sm font-normal text-muted-foreground ml-1">min today</span></p>
+            <p className="text-xs text-muted-foreground mt-1">Daily limit: {screenTime.limit} min</p>
           </div>
           <div className="h-16 w-16 rounded-full border-4 border-green-500 flex items-center justify-center">
             <span className="text-sm font-bold text-green-600">{Math.round(percentage)}%</span>
           </div>
         </div>
-        <div className="bg-gray-100 rounded-full h-3 mb-4">
+        <div className="bg-secondary rounded-full h-3 mb-4">
           <div className={`h-3 rounded-full transition-all ${percentage > 80 ? "bg-red-500" : percentage > 50 ? "bg-amber-500" : "bg-green-500"}`} style={{ width: `${percentage}%` }} />
         </div>
 
         <div className="grid grid-cols-7 gap-2 mb-4">
           {days.map((day, i) => (
             <div key={day} className="text-center">
-              <div className="h-20 bg-gray-50 rounded-lg relative overflow-hidden mb-1">
+              <div className="h-20 bg-secondary/50 rounded-lg relative overflow-hidden mb-1">
                 <div className="absolute bottom-0 left-0 right-0 bg-green-400 rounded-b-lg" style={{ height: `${(weekData[i] / screenTime.limit) * 100}%` }} />
               </div>
-              <span className="text-[10px] font-medium text-gray-500">{day}</span>
+              <span className="text-[10px] font-medium text-muted-foreground">{day}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Eye className="h-4 w-4 text-blue-500" weight="fill" />
-              <h2 className="text-sm font-bold text-gray-900">Eye Rest Reminder</h2>
+              <h2 className="text-sm font-bold text-foreground">Eye Rest Reminder</h2>
             </div>
             <button onClick={() => setScreenTime({ ...screenTime, eyeRest: !screenTime.eyeRest })}
-              className={`relative h-5 w-9 rounded-full transition-colors ${screenTime.eyeRest ? "bg-green-500" : "bg-gray-300"}`}>
+              className={`relative h-5 w-9 rounded-full transition-colors ${screenTime.eyeRest ? "bg-primary" : "bg-border"}`}>
               <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${screenTime.eyeRest ? "left-4.5" : "left-0.5"}`} />
             </button>
           </div>
-          <p className="text-xs text-gray-500 mb-3">Take a break every</p>
+          <p className="text-xs text-muted-foreground mb-3">Take a break every</p>
           <div className="flex gap-2">
             {[5, 10, 12, 15, 20].map((m) => (
               <button key={m} onClick={() => setEyeRestMins(m)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${eyeRestMins === m ? "bg-green-100 text-green-700 ring-1 ring-green-500" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${eyeRestMins === m ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground hover:bg-secondary"}`}>
                 {m}m
               </button>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Timer className="h-4 w-4 text-orange-500" weight="fill" />
-              <h2 className="text-sm font-bold text-gray-900">Daily Limit</h2>
+              <h2 className="text-sm font-bold text-foreground">Daily Limit</h2>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mb-3">Maximum screen time per day</p>
+          <p className="text-xs text-muted-foreground mb-3">Maximum screen time per day</p>
           <div className="flex gap-2">
             {[30, 45, 60, 90, 120].map((m) => (
               <button key={m} onClick={() => setScreenTime({ ...screenTime, limit: m })}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${screenTime.limit === m ? "bg-green-100 text-green-700 ring-1 ring-green-500" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${screenTime.limit === m ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground hover:bg-secondary"}`}>
                 {m}m
               </button>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 sm:col-span-2">
+        <div className="bg-card border border-border rounded-xl p-4 sm:col-span-2">
           <div className="flex items-center gap-2 mb-3">
             <ChartBar className="h-4 w-4 text-purple-500" weight="fill" />
-            <h2 className="text-sm font-bold text-gray-900">Weekly Summary</h2>
+            <h2 className="text-sm font-bold text-foreground">Weekly Summary</h2>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-purple-50 rounded-lg p-3 text-center">
@@ -691,20 +694,20 @@ function GalleryContent({ lessons }: { lessons: LessonRecord[] }) {
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Gallery</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Completed drawings and achievements.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Gallery</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Completed drawings and achievements.</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-4">
         {completed.length > 0 ? completed.map((lesson) => (
-          <div key={lesson.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow group">
+          <div key={lesson.id} className="bg-card border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group">
             <div className="aspect-square bg-gradient-to-br from-green-50 to-amber-50 flex items-center justify-center">
               <span className="text-5xl group-hover:scale-110 transition-transform">{lesson.emoji}</span>
             </div>
             <div className="p-2.5">
-              <p className="text-xs font-bold text-gray-800 truncate">{lesson.label}</p>
+              <p className="text-xs font-bold text-foreground truncate">{lesson.label}</p>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-[10px] text-gray-400">{lesson.category}</span>
+                <span className="text-[10px] text-muted-foreground">{lesson.category}</span>
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: lesson.stars }).map((_, i) => <Star key={i} className="h-2.5 w-2.5 text-amber-400" weight="fill" />)}
                 </div>
@@ -713,9 +716,9 @@ function GalleryContent({ lessons }: { lessons: LessonRecord[] }) {
           </div>
         )) : (
           <div className="col-span-full text-center py-12">
-            <Palette className="h-12 w-12 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400 mb-2">No drawings yet!</p>
-            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Drawing</Link>
+            <Palette className="h-12 w-12 text-border mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground mb-2">No drawings yet!</p>
+            <Link href="/learn" className="inline-flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-white font-bold px-4 py-2 rounded-lg text-xs transition-colors">Start Drawing</Link>
           </div>
         )}
       </div>
@@ -760,18 +763,18 @@ function WorksheetsContent() {
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Worksheets</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Download printable worksheets for offline practice.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Worksheets</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Download printable worksheets for offline practice.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {worksheets.map((ws) => (
-          <div key={ws.type} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+          <div key={ws.type} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
             <span className="text-3xl">{ws.icon}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-800 truncate">{ws.name}</p>
-              <p className="text-[10px] text-gray-400">{ws.desc}</p>
-              <p className="text-[10px] text-gray-300 mt-0.5">PDF • {ws.pages} {ws.pages === 1 ? "page" : "pages"}</p>
+              <p className="text-sm font-bold text-foreground truncate">{ws.name}</p>
+              <p className="text-[10px] text-muted-foreground">{ws.desc}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">PDF • {ws.pages} {ws.pages === 1 ? "page" : "pages"}</p>
             </div>
             <button
               onClick={() => handleDownload(ws.type, ws.name)}
@@ -797,8 +800,8 @@ function BillingContent({ userName }: { userName: string }) {
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Billing</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage your subscription and payment methods.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Billing</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage your subscription and payment methods.</p>
       </div>
 
       <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-6 text-white mb-4">
@@ -816,31 +819,31 @@ function BillingContent({ userName }: { userName: string }) {
         <p className="text-xs opacity-70">Billed $68/year • Renews Dec 2026</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-3">Payment Method</h2>
-        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+      <div className="bg-card border border-border rounded-xl p-4 mb-4">
+        <h2 className="text-sm font-bold text-foreground mb-3">Payment Method</h2>
+        <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
           <div className="h-10 w-16 bg-blue-600 rounded-md flex items-center justify-center">
             <span className="text-white text-xs font-bold">VISA</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-800">•••• •••• •••• 4242</p>
-            <p className="text-[10px] text-gray-400">Expires 12/2027</p>
+            <p className="text-sm font-medium text-foreground">•••• •••• •••• 4242</p>
+            <p className="text-[10px] text-muted-foreground">Expires 12/2027</p>
           </div>
           <button className="text-xs font-semibold text-green-600 hover:text-green-700">Edit</button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-3">Billing History</h2>
+      <div className="bg-card border border-border rounded-xl p-4">
+        <h2 className="text-sm font-bold text-foreground mb-3">Billing History</h2>
         <div className="space-y-2">
           {[{ date: "Aug 18, 2026", amount: "$7.99", status: "Paid" }, { date: "Jul 18, 2026", amount: "$7.99", status: "Paid" }, { date: "Jun 18, 2026", amount: "$7.99", status: "Paid" }].map((b, i) => (
-            <div key={i} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
+            <div key={i} className="flex items-center justify-between p-2.5 bg-secondary/50 rounded-lg">
               <div>
-                <p className="text-xs font-medium text-gray-800">{b.date}</p>
-                <p className="text-[10px] text-gray-400">Family Club</p>
+                <p className="text-xs font-medium text-foreground">{b.date}</p>
+                <p className="text-[10px] text-muted-foreground">Family Club</p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold text-gray-800">{b.amount}</p>
+                <p className="text-xs font-bold text-foreground">{b.amount}</p>
                 <span className="text-[10px] font-medium text-green-600">{b.status}</span>
               </div>
             </div>
@@ -859,32 +862,32 @@ function SecurityContent({ notifications, setNotifications }: {
   return (
     <>
       <div className="mb-5">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Security</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage account security and notifications.</p>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-foreground">Security</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Manage account security and notifications.</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-card border border-border rounded-xl p-4 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <ShieldCheck className="h-4 w-4 text-green-500" weight="fill" />
-          <h2 className="text-sm font-bold text-gray-900">Account Security</h2>
+          <h2 className="text-sm font-bold text-foreground">Account Security</h2>
         </div>
         <div className="space-y-2">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Key className="h-4 w-4 text-gray-400" />
+              <Key className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs font-medium text-gray-800">Password</p>
-                <p className="text-[10px] text-gray-400">Last changed 30 days ago</p>
+                <p className="text-xs font-medium text-foreground">Password</p>
+                <p className="text-[10px] text-muted-foreground">Last changed 30 days ago</p>
               </div>
             </div>
             <button className="text-xs font-semibold text-green-600 hover:text-green-700">Change</button>
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-gray-400" />
+              <Lock className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-xs font-medium text-gray-800">Two-Factor Auth</p>
-                <p className="text-[10px] text-gray-400">Add extra security to your account</p>
+                <p className="text-xs font-medium text-foreground">Two-Factor Auth</p>
+                <p className="text-[10px] text-muted-foreground">Add extra security to your account</p>
               </div>
             </div>
             <button className="text-xs font-semibold text-green-600 hover:text-green-700">Enable</button>
@@ -892,10 +895,10 @@ function SecurityContent({ notifications, setNotifications }: {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+      <div className="bg-card border border-border rounded-xl p-4 mb-4">
         <div className="flex items-center gap-2 mb-3">
           <Bell className="h-4 w-4 text-blue-500" weight="fill" />
-          <h2 className="text-sm font-bold text-gray-900">Notifications</h2>
+          <h2 className="text-sm font-bold text-foreground">Notifications</h2>
         </div>
         <div className="space-y-3">
           {[
@@ -905,11 +908,11 @@ function SecurityContent({ notifications, setNotifications }: {
           ].map((n) => (
             <div key={n.key} className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-medium text-gray-800">{n.label}</p>
-                <p className="text-[10px] text-gray-400">{n.desc}</p>
+                <p className="text-xs font-medium text-foreground">{n.label}</p>
+                <p className="text-[10px] text-muted-foreground">{n.desc}</p>
               </div>
               <button onClick={() => setNotifications({ ...notifications, [n.key]: !notifications[n.key] })}
-                className={`relative h-5 w-9 rounded-full transition-colors ${notifications[n.key] ? "bg-green-500" : "bg-gray-300"}`}>
+                className={`relative h-5 w-9 rounded-full transition-colors ${notifications[n.key] ? "bg-primary" : "bg-border"}`}>
                 <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${notifications[n.key] ? "left-4.5" : "left-0.5"}`} />
               </button>
             </div>
