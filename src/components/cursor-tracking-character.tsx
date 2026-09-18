@@ -22,14 +22,11 @@ export default function CursorTrackingCharacter({
   const rafRef = useRef<number | null>(null);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
+  const isDesktopRef = useRef(false);
 
   const clampedSmoothing = useMemo(() => {
     return Math.min(1, Math.max(0.01, smoothingStrength));
   }, [smoothingStrength]);
-
-  const neutralTransform = useMemo(() => {
-    return "translate3d(0,0,0) rotateX(0deg) rotateY(0deg) scale(1)";
-  }, []);
 
   const clamp = useCallback((value: number, min: number, max: number) => {
     return Math.min(max, Math.max(min, value));
@@ -45,9 +42,7 @@ export default function CursorTrackingCharacter({
       const depth = (Math.abs(x) + Math.abs(y)) * 0.003;
       const scale = 1 + depth;
 
-      node.style.transform = `translate3d(0,0,0) rotateX(${rotateX.toFixed(
-        3
-      )}deg) rotateY(${rotateY.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+      node.style.transform = `rotateX(${rotateX.toFixed(3)}deg) rotateY(${rotateY.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
     },
     []
   );
@@ -55,25 +50,12 @@ export default function CursorTrackingCharacter({
   useEffect(() => {
     const node = wrapperRef.current;
     if (!node) return;
-
-    node.style.transform = neutralTransform;
-
     if (typeof window === "undefined") return;
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    );
-    const coarsePointer = window.matchMedia("(pointer: coarse)");
-    const noHover = window.matchMedia("(hover: none)");
-    const touchOnly =
-      reducedMotion.matches || coarsePointer.matches || noHover.matches;
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
 
-    if (touchOnly) {
-      targetRef.current = { x: 0, y: 0 };
-      currentRef.current = { x: 0, y: 0 };
-      node.style.transform = neutralTransform;
-      return;
-    }
+    isDesktopRef.current = true;
 
     const onMouseMove = (event: MouseEvent) => {
       const halfW = window.innerWidth / 2 || 1;
@@ -112,12 +94,12 @@ export default function CursorTrackingCharacter({
         rafRef.current = null;
       }
     };
-  }, [applyTransform, clamp, clampedSmoothing, neutralTransform]);
+  }, [applyTransform, clamp, clampedSmoothing]);
 
   return (
     <div
-      className={`relative flex items-center justify-center overflow-hidden ${className}`}
-      style={{ width: "100%", height: "100%" }}
+      className={`relative flex items-center justify-center ${className}`}
+      style={{ perspective: 800 }}
     >
       <div
         ref={wrapperRef}
@@ -129,9 +111,9 @@ export default function CursorTrackingCharacter({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          transform: neutralTransform,
           transformStyle: "preserve-3d",
           willChange: "transform",
+          transition: "transform 0.1s ease-out",
         }}
       >
         <Image
@@ -139,7 +121,7 @@ export default function CursorTrackingCharacter({
           alt={altText}
           width={maxSize}
           height={maxSize}
-          className="pointer-events-none select-none object-contain"
+          className="pointer-events-none select-none object-contain w-full h-full"
           priority
         />
       </div>
