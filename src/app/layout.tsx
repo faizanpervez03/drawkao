@@ -43,7 +43,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${poppins.variable} min-h-full flex flex-col bg-background text-foreground font-sans antialiased`}>
+      <body className={`${poppins.variable} min-h-full flex flex-col bg-background text-foreground font-sans antialiased`} suppressHydrationWarning>
         <ThemeProvider>
           <ProgressProvider>
             <SiteShell>{children}</SiteShell>
