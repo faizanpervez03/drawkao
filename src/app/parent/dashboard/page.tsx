@@ -350,11 +350,10 @@ export default function ParentDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/" className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-600 transition-colors bg-gray-50 hover:bg-green-50 px-3 py-1.5 rounded-full">
+            <Link href="/" className="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-green-600 transition-colors bg-gray-50 hover:bg-green-50 px-3 py-1.5 rounded-full">
               <House className="h-3 w-3" />
               Home
             </Link>
-            <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">{childName}</span>
           </div>
         </header>
 
