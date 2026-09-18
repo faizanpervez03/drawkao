@@ -1,27 +1,94 @@
-import { BookOpen, Star, Flame } from "@phosphor-icons/react";
+"use client";
 
-const stats = [
-  {
-    icon: BookOpen,
-    value: "6",
-    label: "Lessons completed",
-    color: "#2e7d32",
-  },
-  {
-    icon: Star,
-    value: "12",
-    label: "Stars earned",
-    color: "#f5a623",
-  },
-  {
-    icon: Flame,
-    value: "3",
-    label: "Day streak",
-    color: "#e57373",
-  },
-];
+import { useState, useEffect } from "react";
+import { BookOpen, Star, Flame } from "@phosphor-icons/react";
+import { createClient } from "@/lib/supabase/client";
+
+interface ProgressData {
+  lessonsCompleted: number;
+  starsEarned: number;
+  streak: number;
+}
 
 export function ProgressPreview() {
+  const [progress, setProgress] = useState<ProgressData>({
+    lessonsCompleted: 0,
+    starsEarned: 0,
+    streak: 0,
+  });
+  const [hasUser, setHasUser] = useState(false);
+
+  useEffect(() => {
+    async function fetchProgress() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setHasUser(false);
+        return;
+      }
+
+      setHasUser(true);
+
+      const { data: userProgress } = await supabase
+        .from("user_progress")
+        .select("stars, completed, completed_at")
+        .eq("user_id", user.id);
+
+      if (!userProgress) return;
+
+      const completed = userProgress.filter((p) => p.completed);
+      const totalStars = completed.reduce((sum, p) => sum + (p.stars || 0), 0);
+
+      const sortedDates = completed
+        .filter((p) => p.completed_at)
+        .map((p) => new Date(p.completed_at!).toDateString())
+        .filter((d, i, arr) => arr.indexOf(d) === i)
+        .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < sortedDates.length; i++) {
+        const expected = new Date(today);
+        expected.setDate(expected.getDate() - i);
+        if (sortedDates[i] === expected.toDateString()) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      setProgress({
+        lessonsCompleted: completed.length,
+        starsEarned: totalStars,
+        streak,
+      });
+    }
+
+    fetchProgress();
+  }, []);
+
+  const stats = [
+    {
+      icon: BookOpen,
+      value: progress.lessonsCompleted,
+      label: "Lessons completed",
+      color: "#2e7d32",
+    },
+    {
+      icon: Star,
+      value: progress.starsEarned,
+      label: "Stars earned",
+      color: "#f5a623",
+    },
+    {
+      icon: Flame,
+      value: progress.streak,
+      label: "Day streak",
+      color: "#e57373",
+    },
+  ];
+
   return (
     <section id="progress" className="bg-background py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -31,8 +98,9 @@ export function ProgressPreview() {
               Keep Drawing!
             </h2>
             <p className="text-muted-foreground text-lg">
-              Your child is making great progress. Every drawing builds skills
-              and confidence.
+              {hasUser
+                ? "Your child is making great progress. Every drawing builds skills and confidence."
+                : "Sign in to track your child's progress. Every drawing builds skills and confidence."}
             </p>
           </div>
 
@@ -58,10 +126,20 @@ export function ProgressPreview() {
             })}
           </div>
 
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent text-xs font-semibold px-4 py-2 rounded-full">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
-            Progress tracking coming soon
-          </div>
+          {hasUser ? (
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-semibold px-4 py-2 rounded-full">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Keep it up!
+            </div>
+          ) : (
+            <a
+              href="/parent/auth"
+              className="inline-flex items-center gap-2 bg-accent/10 text-accent text-xs font-semibold px-4 py-2 rounded-full hover:bg-accent/20 transition-colors"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" />
+              Sign in to track progress
+            </a>
+          )}
         </div>
       </div>
     </section>
