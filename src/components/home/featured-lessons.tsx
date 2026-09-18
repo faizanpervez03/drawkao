@@ -8,7 +8,7 @@ const lessons = [
   {
     letter: "A",
     word: "Apple",
-    image: "https://images.unsplash.com/photo-1568702846914-96b305d2ead1?w=400&h=400&fit=crop&q=80",
+    image: "/images/apple.webp",
     color: "#e57373",
     categoryId: "alphabet",
     slug: "a",
@@ -16,7 +16,7 @@ const lessons = [
   {
     letter: "B",
     word: "Ball",
-    image: "https://images.unsplash.com/photo-1518668701915-1d27e93a8402?w=400&h=400&fit=crop&q=80",
+    image: "/images/featured_ball.jpg",
     color: "#5c9ce6",
     categoryId: "alphabet",
     slug: "b",
@@ -24,7 +24,7 @@ const lessons = [
   {
     letter: "C",
     word: "Cat",
-    image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&h=400&fit=crop&q=80",
+    image: "/images/cat.jpg",
     color: "#f5a623",
     categoryId: "alphabet",
     slug: "c",
@@ -32,7 +32,7 @@ const lessons = [
   {
     letter: "D",
     word: "Dog",
-    image: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=400&fit=crop&q=80",
+    image: "/images/featured_dog.jpg",
     color: "#2e7d32",
     categoryId: "alphabet",
     slug: "d",
