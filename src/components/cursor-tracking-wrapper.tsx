@@ -5,91 +5,87 @@ import { useEffect, useRef, type ReactNode } from "react";
 interface CursorTrackingWrapperProps {
   children: ReactNode;
   className?: string;
-  rotateYMax?: number;
-  rotateXMax?: number;
-  translateMax?: number;
-  smoothing?: number;
 }
 
 export default function CursorTrackingWrapper({
   children,
   className = "",
-  rotateYMax = 8,
-  rotateXMax = 5,
-  translateMax = 3,
-  smoothing = 0.08,
 }: CursorTrackingWrapperProps) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const trackingRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
-  const targetRef = useRef({ x: 0, y: 0 });
-  const currentRef = useRef({ x: 0, y: 0 });
+  const targetX = useRef(0);
+  const targetY = useRef(0);
+  const currentX = useRef(0);
+  const currentY = useRef(0);
+  const isCoarseRef = useRef(false);
 
   useEffect(() => {
-    const node = wrapperRef.current;
-    if (!node || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
-    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
+    const coarseQuery = window.matchMedia("(pointer: coarse)");
+    isCoarseRef.current = coarseQuery.matches;
+
+    const onCoarseChange = (e: MediaQueryListEvent) => {
+      isCoarseRef.current = e.matches;
+    };
+    coarseQuery.addEventListener("change", onCoarseChange);
+
+    if (isCoarseRef.current) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
 
-    const onMouseMove = (e: MouseEvent) => {
-      const halfW = window.innerWidth / 2 || 1;
-      const halfH = window.innerHeight / 2 || 1;
-      targetRef.current.x = (e.clientX - halfW) / halfW;
-      targetRef.current.y = (e.clientY - halfH) / halfH;
+    const handlePointerMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch") return;
+      const normalizedX = (e.clientX / window.innerWidth - 0.5) * 2;
+      const normalizedY = (e.clientY / window.innerHeight - 0.5) * 2;
+      targetY.current = normalizedX * 8;
+      targetX.current = normalizedY * -5;
     };
 
-    const onReset = () => {
-      targetRef.current.x = 0;
-      targetRef.current.y = 0;
+    const resetPosition = () => {
+      targetX.current = 0;
+      targetY.current = 0;
     };
-
-    const clamp = (v: number, min: number, max: number) =>
-      Math.min(max, Math.max(min, v));
 
     const tick = () => {
-      const c = currentRef.current;
-      const t = targetRef.current;
+      currentX.current += (targetX.current - currentX.current) * 0.08;
+      currentY.current += (targetY.current - currentY.current) * 0.08;
 
-      c.x += (t.x - c.x) * smoothing;
-      c.y += (t.y - c.y) * smoothing;
-
-      const rotY = clamp(c.x, -1, 1) * rotateYMax;
-      const rotX = clamp(c.y, -1, 1) * -rotateXMax;
-      const tx = clamp(c.x, -1, 1) * translateMax;
-      const ty = clamp(c.y, -1, 1) * -translateMax;
-
-      node.style.transform =
-        `perspective(800px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateX(${tx.toFixed(2)}px) translateY(${ty.toFixed(2)}px)`;
+      const node = trackingRef.current;
+      if (node) {
+        node.style.transform =
+          `rotateX(${currentX.current.toFixed(2)}deg) rotateY(${currentY.current.toFixed(2)}deg)`;
+      }
 
       rafRef.current = requestAnimationFrame(tick);
     };
 
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    window.addEventListener("mouseleave", onReset);
-    window.addEventListener("blur", onReset);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("mouseleave", resetPosition);
+    window.addEventListener("blur", resetPosition);
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseleave", onReset);
-      window.removeEventListener("blur", onReset);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("mouseleave", resetPosition);
+      window.removeEventListener("blur", resetPosition);
+      coarseQuery.removeEventListener("change", onCoarseChange);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [rotateYMax, rotateXMax, translateMax, smoothing]);
+  }, []);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={className}
-      style={{
-        transformStyle: "preserve-3d",
-        willChange: "transform",
-      }}
-    >
-      {children}
+    <div className={className} style={{ perspective: "1000px" }}>
+      <div
+        ref={trackingRef}
+        style={{
+          transformStyle: "preserve-3d",
+          willChange: "transform",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
