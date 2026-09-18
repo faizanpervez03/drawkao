@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { List, X, SignOut, User } from "@phosphor-icons/react";
+import { List, X, SignOut, User, CaretDown, GearSix, House } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
@@ -18,11 +18,14 @@ const navLinks = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [supabase] = useState(() => createClient());
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -33,6 +36,7 @@ export function Navbar() {
           || user.email?.split("@")[0]
           || "";
         setUserName(name);
+        setUserEmail(user.email || "");
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
@@ -41,10 +45,22 @@ export function Navbar() {
     checkUser();
   }, [supabase]);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
+    setDropdownOpen(false);
     await supabase.auth.signOut();
     setIsLoggedIn(false);
     setUserName("");
+    setUserEmail("");
     router.push("/");
   };
 
@@ -52,6 +68,8 @@ export function Navbar() {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
+
+  const userInitial = userName.charAt(0).toUpperCase();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 backdrop-blur-md">
@@ -96,23 +114,59 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <ThemeToggle />
             {isLoggedIn ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/parent/dashboard"
-                  className="flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-4 py-2 rounded-full transition-colors text-sm"
-                >
-                  <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">{userName.charAt(0).toUpperCase()}</span>
-                  </div>
-                  {userName}
-                </Link>
+              <div className="relative" ref={dropdownRef}>
                 <button
-                  onClick={handleLogout}
-                  className="h-9 w-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
-                  title="Sign out"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 bg-secondary hover:bg-secondary/80 text-foreground font-semibold px-4 py-2 rounded-full transition-colors text-sm cursor-pointer"
                 >
-                  <SignOut className="h-4 w-4 text-gray-600" />
+                  <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{userInitial}</span>
+                  </div>
+                  <span className="max-w-[100px] truncate">{userName}</span>
+                  <CaretDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
                 </button>
+
+                <AnimatePresence>
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.5)] overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-border">
+                        <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+                      </div>
+                      <div className="py-1">
+                        <Link
+                          href="/"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                        >
+                          <House className="h-4 w-4" />
+                          Home
+                        </Link>
+                        <Link
+                          href="/parent/dashboard"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                        >
+                          <GearSix className="h-4 w-4" />
+                          Parent Dashboard
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+                        >
+                          <SignOut className="h-4 w-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <>
@@ -175,19 +229,26 @@ export function Navbar() {
               <div className="pt-3 border-t border-border space-y-2 mt-2">
                 {isLoggedIn ? (
                   <>
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-secondary/50">
+                      <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                        <span className="text-sm font-bold text-white">{userInitial}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+                      </div>
+                    </div>
                     <Link
                       href="/parent/dashboard"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-2 text-center text-[15px] font-medium text-green-700 py-3 rounded-full bg-green-50 px-4"
+                      className="flex items-center gap-3 text-[15px] font-medium text-muted-foreground py-3 rounded-xl px-4 hover:bg-secondary"
                     >
-                      <div className="h-7 w-7 rounded-full bg-green-600 flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">{userName.charAt(0).toUpperCase()}</span>
-                      </div>
-                      {userName}
+                      <GearSix className="h-4 w-4" />
+                      Parent Dashboard
                     </Link>
                     <button
                       onClick={() => { handleLogout(); setMobileOpen(false); }}
-                      className="w-full flex items-center justify-center gap-2 text-center text-[15px] text-gray-500 py-3 rounded-full hover:bg-secondary"
+                      className="w-full flex items-center gap-3 text-center text-[15px] text-red-500 py-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 px-4 cursor-pointer"
                     >
                       <SignOut className="h-4 w-4" />
                       Sign Out
