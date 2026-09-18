@@ -47,7 +47,7 @@ const categories = [
 
 export function CategorySection() {
   return (
-    <section id="categories" className="bg-card py-20 sm:py-28">
+    <section id="categories" className="bg-card pt-8 pb-20 sm:pt-12 sm:pb-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-3 mb-14">
           <p className="text-sm font-semibold text-accent uppercase tracking-wider">
