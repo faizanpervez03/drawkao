@@ -59,7 +59,7 @@ export function Navbar() {
         <div className="flex h-[5rem] items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={140} height={45} className="h-11 w-auto" priority />
+            <Image src="/images/DrawKao_Logo.png" alt="Draw Kao" width={160} height={50} className="h-14 w-auto" priority />
           </Link>
 
           {/* Desktop Nav */}
