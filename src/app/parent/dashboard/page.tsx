@@ -744,14 +744,37 @@ function GalleryContent({ lessons }: { lessons: LessonRecord[] }) {
 
 /* ==================== WORKSHEETS ==================== */
 function WorksheetsContent() {
+  const [downloading, setDownloading] = useState<string | null>(null);
+
   const worksheets = [
-    { name: "Alphabet Tracing A-Z", type: "PDF", pages: 26, icon: "📝" },
-    { name: "Number Practice 1-20", type: "PDF", pages: 20, icon: "🔢" },
-    { name: "Shape Coloring Book", type: "PDF", pages: 12, icon: "🎨" },
-    { name: "Animal Drawing Guide", type: "PDF", pages: 10, icon: "🐱" },
-    { name: "Fruit & Veggie Pages", type: "PDF", pages: 8, icon: "🍎" },
-    { name: "Vehicle Sketch Pages", type: "PDF", pages: 6, icon: "🚗" },
+    { name: "Alphabet Tracing A-Z", type: "alphabet", pages: 6, icon: "📝", desc: "Trace and practice all 26 letters" },
+    { name: "Number Practice 1-20", type: "numbers", pages: 2, icon: "🔢", desc: "Trace and write numbers 1 to 20" },
+    { name: "Shape Coloring Book", type: "shapes", pages: 1, icon: "🎨", desc: "Learn to draw 8 basic shapes" },
+    { name: "Animal Coloring Pages", type: "coloring", pages: 1, icon: "🐱", desc: "Color in 6 friendly animals" },
+    { name: "Animal Drawing Guide", type: "animals", pages: 1, icon: "🐾", desc: "Step-by-step animal drawing" },
+    { name: "Vehicle Drawing Guide", type: "vehicles", pages: 1, icon: "🚗", desc: "Step-by-step vehicle drawing" },
   ];
+
+  const handleDownload = async (type: string, name: string) => {
+    setDownloading(type);
+    try {
+      const res = await fetch(`/api/worksheets/${type}`);
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${name}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Failed to download worksheet. Please try again.");
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   return (
     <>
@@ -761,16 +784,25 @@ function WorksheetsContent() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {worksheets.map((ws, i) => (
-          <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
+        {worksheets.map((ws) => (
+          <div key={ws.type} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-3 hover:shadow-md transition-shadow">
             <span className="text-3xl">{ws.icon}</span>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gray-800 truncate">{ws.name}</p>
-              <p className="text-[10px] text-gray-400">{ws.type} • {ws.pages} pages</p>
+              <p className="text-[10px] text-gray-400">{ws.desc}</p>
+              <p className="text-[10px] text-gray-300 mt-0.5">PDF • {ws.pages} {ws.pages === 1 ? "page" : "pages"}</p>
             </div>
-            <button className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors">
-              <Download className="h-3 w-3" />
-              Download
+            <button
+              onClick={() => handleDownload(ws.type, ws.name)}
+              disabled={downloading === ws.type}
+              className="flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {downloading === ws.type ? (
+                <div className="h-3 w-3 rounded-full border-2 border-green-600 border-t-transparent animate-spin" />
+              ) : (
+                <Download className="h-3 w-3" />
+              )}
+              {downloading === ws.type ? "Generating..." : "Download"}
             </button>
           </div>
         ))}
