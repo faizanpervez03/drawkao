@@ -7,6 +7,7 @@ const categories = [
     emoji: "ABC",
     color: "#2e7d32",
     image: "/images/abc.avif",
+    href: "/learn/alphabet",
   },
   {
     name: "Fruits",
@@ -14,6 +15,7 @@ const categories = [
     emoji: "🍎",
     color: "#e57373",
     image: "/images/apple.webp",
+    href: "/learn/fruits",
   },
   {
     name: "Animals",
@@ -21,6 +23,7 @@ const categories = [
     emoji: "🐱",
     color: "#5c9ce6",
     image: "/images/cat.jpg",
+    href: "/learn/animals",
   },
   {
     name: "Shapes",
@@ -28,6 +31,7 @@ const categories = [
     emoji: "⬡",
     color: "#f5a623",
     image: "/images/shapes.jpg",
+    href: "/learn/shapes",
   },
   {
     name: "Vehicles",
@@ -35,6 +39,7 @@ const categories = [
     emoji: "🚗",
     color: "#9575cd",
     image: "/images/car.jpg",
+    href: "/learn/vehicles",
   },
   {
     name: "Nature",
@@ -42,6 +47,7 @@ const categories = [
     emoji: "🌸",
     color: "#4caf50",
     image: "/images/nature.jpg",
+    href: "/learn/nature",
   },
 ];
 

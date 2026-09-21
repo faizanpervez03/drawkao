@@ -32,14 +32,14 @@ export default function AdminParentsPage() {
     async function fetchParents() {
       const { data: profiles } = await supabase
         .from("child_profiles")
-        .select("id, parent_id, created_at");
+        .select("id, parent_id, display_name, created_at");
 
       const parentMap: Record<string, ParentAccount> = {};
       (profiles || []).forEach((p: any) => {
         if (!parentMap[p.parent_id]) {
           parentMap[p.parent_id] = {
             id: p.parent_id,
-            email: `${p.parent_id.slice(0, 8)}...`,
+            email: p.display_name ? `${p.display_name}'s Account` : `Parent ${p.parent_id.slice(0, 8)}`,
             created_at: p.created_at,
             last_sign_in: null,
             child_count: 0,

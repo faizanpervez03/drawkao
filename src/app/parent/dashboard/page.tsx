@@ -114,9 +114,16 @@ export default function ParentDashboardPage() {
       if (profiles?.display_name) setChildName(profiles.display_name);
 
       const { data: progress } = await supabase
+        .from("lesson_progress")
+        .select("id, item_id, stars, completed, completed_at")
+        .eq("child_id", u.id);
+
+      const { data: legacyProgress } = await supabase
         .from("user_progress")
         .select("id, item_id, stars, completed, completed_at")
         .eq("user_id", u.id);
+
+      const finalProgress = (progress && progress.length > 0) ? progress : legacyProgress;
 
       const { count: totalItems } = await supabase
         .from("items")
@@ -135,7 +142,7 @@ export default function ParentDashboardPage() {
       categories?.forEach((c) => { catMap[c.id] = c.name; });
 
       const progressMap: Record<string, { completed: boolean; stars: number; completed_at: string | null }> = {};
-      progress?.forEach((p) => { progressMap[p.item_id] = { completed: p.completed, stars: p.stars, completed_at: p.completed_at }; });
+      finalProgress?.forEach((p) => { progressMap[p.item_id] = { completed: p.completed, stars: p.stars, completed_at: p.completed_at }; });
 
       const allLessons: LessonRecord[] = (items || []).map((item) => {
         const prog = progressMap[item.id];

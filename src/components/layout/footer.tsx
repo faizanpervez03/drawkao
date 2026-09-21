@@ -3,18 +3,18 @@ import Link from "next/link";
 
 const footerLinks = {
   learn: [
-    { label: "Categories", href: "#categories" },
-    { label: "Lessons", href: "#lessons" },
-    { label: "How It Works", href: "#how-it-works" },
+    { label: "Categories", href: "/learn" },
+    { label: "Alphabet", href: "/learn/alphabet" },
+    { label: "How It Works", href: "/#how-it-works" },
   ],
   company: [
-    { label: "About", href: "#" },
-    { label: "Contact", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
     { label: "For Parents", href: "/parent/auth" },
   ],
   legal: [
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
   ],
 };
 

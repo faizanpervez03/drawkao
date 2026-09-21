@@ -13,6 +13,8 @@ import {
   CheckCircle,
   PencilSimple,
   Warning,
+  X,
+  Trash,
 } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, Item } from "@/types/database";
@@ -34,6 +36,18 @@ interface ItemWithMeta extends Item {
   _completionCount: number;
 }
 
+interface LessonForm {
+  id: string;
+  label: string;
+  slug: string;
+  emoji: string;
+  word: string;
+  pronunciation: string;
+  category_id: string;
+  color: string;
+  sort_order: number;
+}
+
 export default function AdminLessonsPage() {
   const [items, setItems] = useState<ItemWithMeta[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -43,44 +57,87 @@ export default function AdminLessonsPage() {
   const [sortField, setSortField] = useState<"label" | "category_id">("label");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<ItemWithMeta | null>(null);
+  const [form, setForm] = useState<LessonForm>({ id: "", label: "", slug: "", emoji: "📝", word: "", pronunciation: "", category_id: "", color: "#2e7d32", sort_order: 0 });
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const supabase = createClient();
 
+  async function fetchData() {
+    const [itemsRes, catsRes, stepsRes, progressRes] = await Promise.all([
+      supabase.from("items").select("*").order("sort_order", { ascending: true }),
+      supabase.from("categories").select("*").order("sort_order", { ascending: true }),
+      supabase.from("drawing_steps").select("item_id"),
+      supabase.from("user_progress").select("item_id, completed"),
+    ]);
+
+    const stepsData = stepsRes.data || [];
+    const progressData = progressRes.data || [];
+
+    const stepsCounts: Record<string, number> = {};
+    stepsData.forEach((s: any) => {
+      stepsCounts[s.item_id] = (stepsCounts[s.item_id] || 0) + 1;
+    });
+
+    const completionCounts: Record<string, number> = {};
+    progressData.forEach((p: any) => {
+      if (p.completed) {
+        completionCounts[p.item_id] = (completionCounts[p.item_id] || 0) + 1;
+      }
+    });
+
+    const enriched = (itemsRes.data || []).map((item: Item) => ({
+      ...item,
+      _stepsCount: stepsCounts[item.id] || (item.drawing_steps?.length || 0),
+      _completionCount: completionCounts[item.id] || 0,
+    }));
+
+    setItems(enriched);
+    setCategories(catsRes.data || []);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function fetchData() {
-      const [itemsRes, catsRes, stepsRes, progressRes] = await Promise.all([
-        supabase.from("items").select("*").order("sort_order", { ascending: true }),
-        supabase.from("categories").select("*").order("sort_order", { ascending: true }),
-        supabase.from("drawing_steps").select("item_id"),
-        supabase.from("user_progress").select("item_id, completed"),
-      ]);
-
-      const stepsData = stepsRes.data || [];
-      const progressData = progressRes.data || [];
-
-      const stepsCounts: Record<string, number> = {};
-      stepsData.forEach((s: any) => {
-        stepsCounts[s.item_id] = (stepsCounts[s.item_id] || 0) + 1;
-      });
-
-      const completionCounts: Record<string, number> = {};
-      progressData.forEach((p: any) => {
-        if (p.completed) {
-          completionCounts[p.item_id] = (completionCounts[p.item_id] || 0) + 1;
-        }
-      });
-
-      const enriched = (itemsRes.data || []).map((item: Item) => ({
-        ...item,
-        _stepsCount: stepsCounts[item.id] || (item.drawing_steps?.length || 0),
-        _completionCount: completionCounts[item.id] || 0,
-      }));
-
-      setItems(enriched);
-      setCategories(catsRes.data || []);
-      setLoading(false);
-    }
     fetchData();
-  }, [supabase]);
+  }, []);
+
+  function openAdd() {
+    setEditingItem(null);
+    setForm({ id: "", label: "", slug: "", emoji: "📝", word: "", pronunciation: "", category_id: categories[0]?.id || "", color: "#2e7d32", sort_order: items.length });
+    setShowModal(true);
+  }
+
+  function openEdit(item: ItemWithMeta) {
+    setEditingItem(item);
+    setForm({ id: item.id, label: item.label || "", slug: item.slug || "", emoji: item.emoji || "📝", word: item.word || "", pronunciation: item.pronunciation || "", category_id: item.category_id, color: item.color || "#2e7d32", sort_order: item.sort_order || 0 });
+    setShowModal(true);
+  }
+
+  async function handleSave() {
+    if (!form.label.trim() || !form.category_id) return;
+    setSaving(true);
+    const slug = form.slug || form.label.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    const id = editingItem ? editingItem.id : form.id || slug;
+
+    if (editingItem) {
+      await supabase.from("items").update({ label: form.label, slug, emoji: form.emoji, word: form.word, pronunciation: form.pronunciation, category_id: form.category_id, color: form.color, sort_order: form.sort_order }).eq("id", editingItem.id);
+    } else {
+      await supabase.from("items").insert({ id, label: form.label, slug, emoji: form.emoji, word: form.word, pronunciation: form.pronunciation, category_id: form.category_id, color: form.color, sort_order: form.sort_order, drawing_steps: [] });
+    }
+    setShowModal(false);
+    setSaving(false);
+    fetchData();
+  }
+
+  async function handleDelete(id: string) {
+    setDeleting(id);
+    await supabase.from("items").delete().eq("id", id);
+    setDeleting(null);
+    setConfirmDelete(null);
+    fetchData();
+  }
 
   const categoryMap = useMemo(() => {
     const map: Record<string, Category> = {};
@@ -141,7 +198,7 @@ export default function AdminLessonsPage() {
             <Download className="h-4 w-4" />
             Export Catalog
           </button>
-          <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
+          <button onClick={openAdd} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
             <Plus className="h-4 w-4" weight="bold" />
             + Add Lesson
           </button>
@@ -282,6 +339,14 @@ export default function AdminLessonsPage() {
                 <div>
                   <span className="text-sm font-semibold text-gray-800">{item._completionCount}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => openEdit(item)} className="h-7 w-7 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+                    <PencilSimple className="h-3.5 w-3.5 text-gray-500" />
+                  </button>
+                  <button onClick={() => setConfirmDelete(item.id)} className="h-7 w-7 rounded-lg hover:bg-red-50 flex items-center justify-center">
+                    <Trash className="h-3.5 w-3.5 text-red-400" />
+                  </button>
+                </div>
               </motion.div>
             );
           })
@@ -322,6 +387,85 @@ export default function AdminLessonsPage() {
             >
               Next &gt;
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <Warning className="h-5 w-5 text-red-600" weight="fill" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900">Delete Lesson</h3>
+                <p className="text-xs text-gray-500">This cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-5">Are you sure you want to delete this lesson?</p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+              <button onClick={() => handleDelete(confirmDelete)} disabled={deleting === confirmDelete}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50">
+                {deleting === confirmDelete ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-900">{editingItem ? "Edit Lesson" : "Add Lesson"}</h2>
+              <button onClick={() => setShowModal(false)} className="h-8 w-8 rounded-lg hover:bg-gray-100 flex items-center justify-center">
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Label</label>
+                <input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="e.g. Apple"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/40" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Emoji</label>
+                  <input value={form.emoji} onChange={(e) => setForm({ ...form, emoji: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/40" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Category</label>
+                  <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/40">
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Word</label>
+                  <input value={form.word} onChange={(e) => setForm({ ...form, word: e.target.value })} placeholder="e.g. apple"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/40" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Pronunciation</label>
+                  <input value={form.pronunciation} onChange={(e) => setForm({ ...form, pronunciation: e.target.value })} placeholder="e.g. A-P-L"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/40" />
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end mt-6">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+              <button onClick={handleSave} disabled={saving || !form.label.trim()}
+                className="px-4 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-50">
+                {saving ? "Saving..." : editingItem ? "Update" : "Create"}
+              </button>
+            </div>
           </div>
         </div>
       )}

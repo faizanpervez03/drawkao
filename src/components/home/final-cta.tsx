@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
 
 export function FinalCta() {
@@ -22,13 +23,13 @@ export function FinalCta() {
               Pick a lesson, grab your pencil, and start learning.
             </p>
             <div className="pt-3">
-              <a
-                href="#"
+              <Link
+                href="/learn"
                 className="inline-flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 text-base font-bold px-10 py-3.5 rounded-full shadow-[0_4px_16px_rgba(46,125,50,0.3)] hover:shadow-[0_6px_24px_rgba(46,125,50,0.4)] transition-all gap-2"
               >
                 Start Drawing
                 <ArrowRight className="h-4 w-4" weight="bold" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>

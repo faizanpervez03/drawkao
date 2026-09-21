@@ -133,7 +133,7 @@ export function Hero() {
             variants={scaleIn}
             className="relative flex justify-center lg:justify-end"
           >
-            <div className="relative w-full max-w-lg">
+            <div className="relative w-full max-w-2xl">
               {/* Character */}
               <Image
                 src="/images/kid_hero_img.png"
