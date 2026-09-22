@@ -2,119 +2,77 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Gear,
-  Bell,
-  Lock,
-  Download,
-  CheckCircle,
-  Warning,
-  Trash,
-} from "@phosphor-icons/react";
+import { Gear, Bell, Lock, Download, CheckCircle, Warning, Trash } from "@phosphor-icons/react";
+import { createClient } from "@/lib/supabase/client";
 
-interface SettingItem {
-  label: string;
-  key: string;
-  value: boolean | string;
-  type: "toggle" | "text" | "email" | "number";
-}
-
-interface SettingSection {
-  title: string;
-  icon: React.ElementType;
-  items: SettingItem[];
-}
-
-const defaultSettings: SettingSection[] = [
-  {
-    title: "General",
-    icon: Gear,
-    items: [
-      { label: "Platform Name", key: "platform_name", value: "Draw Kao", type: "text" },
-      { label: "Tagline", key: "tagline", value: "Learn Through Drawing", type: "text" },
-      { label: "Support Email", key: "support_email", value: "support@drawkao.com", type: "email" },
-    ],
-  },
-  {
-    title: "Notifications",
-    icon: Bell,
-    items: [
-      { label: "Email Notifications", key: "email_notifications", value: true, type: "toggle" },
-      { label: "Weekly Progress Reports", key: "weekly_reports", value: true, type: "toggle" },
-      { label: "New User Alerts", key: "new_user_alerts", value: false, type: "toggle" },
-    ],
-  },
-  {
-    title: "Security",
-    icon: Lock,
-    items: [
-      { label: "Require Email Verification", key: "email_verification", value: true, type: "toggle" },
-      { label: "Two-Factor Authentication", key: "two_factor", value: false, type: "toggle" },
-      { label: "Session Timeout (minutes)", key: "session_timeout", value: "60", type: "number" },
-    ],
-  },
-];
-
-function loadSettings(): SettingSection[] {
-  if (typeof window === "undefined") return defaultSettings;
-  try {
-    const saved = localStorage.getItem("dk_admin_settings");
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return defaultSettings;
-}
-
-function saveSettings(settings: SettingSection[]) {
-  try {
-    localStorage.setItem("dk_admin_settings", JSON.stringify(settings));
-  } catch {}
-}
+const defaultSettings = {
+  platform_name: "Draw Kao",
+  tagline: "Learn Through Drawing",
+  support_email: "support@drawkao.com",
+  email_notifications: true,
+  weekly_reports: true,
+  new_user_alerts: false,
+  email_verification: true,
+  two_factor: false,
+  session_timeout: "60",
+};
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<SettingSection[]>(defaultSettings);
+  const [settings, setSettings] = useState(defaultSettings);
   const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
-    setSettings(loadSettings());
-    setMounted(true);
+    async function loadSettings() {
+      const { data } = await supabase.from("admin_settings").select("key, value").limit(50);
+      if (data && data.length > 0) {
+        const loaded = { ...defaultSettings };
+        data.forEach((s: any) => {
+          if (s.key in loaded) {
+            if (typeof loaded[s.key as keyof typeof loaded] === "boolean") {
+              (loaded as any)[s.key] = s.value === "true";
+            } else {
+              (loaded as any)[s.key] = s.value;
+            }
+          }
+        });
+        setSettings(loaded);
+      }
+      setLoading(false);
+    }
+    loadSettings();
   }, []);
 
-  const handleToggle = (sectionIdx: number, itemIdx: number) => {
-    setSettings((prev) => {
-      const next = [...prev];
-      const section = { ...next[sectionIdx] };
-      const items = [...section.items];
-      const item = { ...items[itemIdx] };
-      item.value = !item.value;
-      items[itemIdx] = item;
-      section.items = items;
-      next[sectionIdx] = section;
-      return next;
-    });
-  };
+  const handleSave = async () => {
+    const updates = Object.entries(settings).map(([key, value]) => ({
+      key,
+      value: String(value),
+    }));
 
-  const handleTextChange = (sectionIdx: number, itemIdx: number, value: string) => {
-    setSettings((prev) => {
-      const next = [...prev];
-      const section = { ...next[sectionIdx] };
-      const items = [...section.items];
-      const item = { ...items[itemIdx] };
-      item.value = value;
-      items[itemIdx] = item;
-      section.items = items;
-      next[sectionIdx] = section;
-      return next;
-    });
-  };
+    for (const item of updates) {
+      await supabase
+        .from("admin_settings")
+        .upsert({ key: item.key, value: item.value }, { onConflict: "key" });
+    }
 
-  const handleSave = () => {
-    saveSettings(settings);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  if (!mounted) {
+  const handleReset = async () => {
+    setResetting(true);
+    for (const [key, value] of Object.entries(defaultSettings)) {
+      await supabase
+        .from("admin_settings")
+        .upsert({ key, value: String(value) }, { onConflict: "key" });
+    }
+    setSettings(defaultSettings);
+    setResetting(false);
+  };
+
+  if (loading) {
     return (
       <div className="p-6 lg:p-8 max-w-4xl mx-auto">
         <div className="flex items-center justify-center py-20">
@@ -126,81 +84,103 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-4xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900">Settings</h1>
           <p className="text-gray-500 mt-1">Configure your Draw Kao platform</p>
         </div>
-        <button
-          onClick={handleSave}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm"
-        >
+        <button onClick={handleSave}
+          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
           {saved ? (
-            <>
-              <CheckCircle className="h-4 w-4" weight="fill" />
-              Saved!
-            </>
+            <><CheckCircle className="h-4 w-4" weight="fill" /> Saved!</>
           ) : (
-            <>
-              <Download className="h-4 w-4" weight="bold" />
-              Save Changes
-            </>
+            <><Download className="h-4 w-4" weight="bold" /> Save Changes</>
           )}
         </button>
       </div>
 
-      {/* Settings Sections */}
       <div className="space-y-6">
-        {settings.map((section, sectionIdx) => (
-          <motion.div
-            key={section.title}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: sectionIdx * 0.05 }}
-            className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
-          >
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
-              <section.icon className="h-5 w-5 text-green-600" />
-              <h2 className="text-lg font-bold text-gray-900">{section.title}</h2>
+        {/* General */}
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+            <Gear className="h-5 w-5 text-green-600" />
+            <h2 className="text-lg font-bold text-gray-900">General</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[
+              { key: "platform_name" as const, label: "Platform Name" },
+              { key: "tagline" as const, label: "Tagline" },
+              { key: "support_email" as const, label: "Support Email" },
+            ].map((item) => (
+              <div key={item.key} className="px-6 py-4 flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                <input type="text" value={settings[item.key]}
+                  onChange={(e) => setSettings({ ...settings, [item.key]: e.target.value })}
+                  className="h-10 w-64 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all" />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Notifications */}
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+            <Bell className="h-5 w-5 text-green-600" />
+            <h2 className="text-lg font-bold text-gray-900">Notifications</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[
+              { key: "email_notifications" as const, label: "Email Notifications" },
+              { key: "weekly_reports" as const, label: "Weekly Progress Reports" },
+              { key: "new_user_alerts" as const, label: "New User Alerts" },
+            ].map((item) => (
+              <div key={item.key} className="px-6 py-4 flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                <button onClick={() => setSettings({ ...settings, [item.key]: !settings[item.key] })}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${settings[item.key] ? "bg-green-500" : "bg-gray-300"}`}>
+                  <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                    style={{ left: settings[item.key] ? "22px" : "2px" }} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Security */}
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+            <Lock className="h-5 w-5 text-green-600" />
+            <h2 className="text-lg font-bold text-gray-900">Security</h2>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {[
+              { key: "email_verification" as const, label: "Require Email Verification" },
+              { key: "two_factor" as const, label: "Two-Factor Authentication" },
+            ].map((item) => (
+              <div key={item.key} className="px-6 py-4 flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700">{item.label}</span>
+                <button onClick={() => setSettings({ ...settings, [item.key]: !settings[item.key] })}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${settings[item.key] ? "bg-green-500" : "bg-gray-300"}`}>
+                  <span className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                    style={{ left: settings[item.key] ? "22px" : "2px" }} />
+                </button>
+              </div>
+            ))}
+            <div className="px-6 py-4 flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">Session Timeout (minutes)</span>
+              <input type="number" min="5" max="480" value={settings.session_timeout}
+                onChange={(e) => setSettings({ ...settings, session_timeout: e.target.value })}
+                className="h-10 w-32 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all" />
             </div>
-            <div className="divide-y divide-gray-100">
-              {section.items.map((item, itemIdx) => (
-                <div key={item.key} className="px-6 py-4 flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">{item.label}</span>
-                  {item.type === "toggle" ? (
-                    <button
-                      onClick={() => handleToggle(sectionIdx, itemIdx)}
-                      className={`relative h-6 w-11 rounded-full transition-colors ${
-                        item.value ? "bg-green-500" : "bg-gray-300"
-                      }`}
-                    >
-                      <span
-                        className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
-                        style={{ left: item.value ? "22px" : "2px" }}
-                      />
-                    </button>
-                  ) : (
-                    <input
-                      type={item.type}
-                      value={item.value as string}
-                      onChange={(e) => handleTextChange(sectionIdx, itemIdx, e.target.value)}
-                      className="h-10 w-64 px-4 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+          </div>
+        </motion.div>
 
         {/* Danger Zone */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl border border-red-200 overflow-hidden"
-        >
+        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          className="bg-white rounded-2xl border border-red-200 overflow-hidden">
           <div className="px-6 py-4 bg-red-50 border-b border-red-200 flex items-center gap-3">
             <Warning className="h-5 w-5 text-red-600" />
             <h2 className="text-lg font-bold text-red-900">Danger Zone</h2>
@@ -211,14 +191,9 @@ export default function AdminSettingsPage() {
                 <p className="text-sm font-medium text-gray-700">Reset All Settings</p>
                 <p className="text-xs text-gray-400">Restore all settings to their default values</p>
               </div>
-              <button
-                onClick={() => {
-                  setSettings(defaultSettings);
-                  saveSettings(defaultSettings);
-                }}
-                className="px-4 py-2 bg-orange-100 text-orange-700 font-semibold rounded-xl text-sm hover:bg-orange-200 transition-colors"
-              >
-                Reset to Default
+              <button onClick={handleReset} disabled={resetting}
+                className="px-4 py-2 bg-orange-100 text-orange-700 font-semibold rounded-xl text-sm hover:bg-orange-200 transition-colors disabled:opacity-50">
+                {resetting ? "Resetting..." : "Reset to Default"}
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -227,8 +202,7 @@ export default function AdminSettingsPage() {
                 <p className="text-xs text-gray-400">This will clear all child progress data</p>
               </div>
               <button className="px-4 py-2 bg-red-100 text-red-700 font-semibold rounded-xl text-sm hover:bg-red-200 transition-colors flex items-center gap-2">
-                <Trash className="h-3 w-3" />
-                Reset
+                <Trash className="h-3 w-3" /> Reset
               </button>
             </div>
           </div>
