@@ -8,6 +8,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const isParent = pathname.startsWith("/parent");
+  const isHome = pathname === "/";
 
   if (isAdmin || isParent) {
     return <>{children}</>;
@@ -17,7 +18,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <Navbar />
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!isHome && <Footer />}
     </>
   );
 }
