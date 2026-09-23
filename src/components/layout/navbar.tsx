@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/learn", label: "Learn" },
-  { href: "#about", label: "About" },
+  { href: "/about", label: "About" },
   { href: "/my-progress", label: "My Progress" },
 ];
 
@@ -172,7 +172,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/parent/auth"
-                  className="text-[15px] font-medium text-muted-foreground hover:text-foreground px-4 py-2 rounded-full hover:bg-secondary transition-colors"
+                  className="text-[15px] font-semibold text-primary border-2 border-primary hover:bg-primary hover:text-primary-foreground px-5 py-2 rounded-full transition-all"
                 >
                   For Parents
                 </Link>
@@ -259,7 +259,7 @@ export function Navbar() {
                     <Link
                       href="/parent/auth"
                       onClick={() => setMobileOpen(false)}
-                      className="block text-center text-[15px] text-muted-foreground py-3 rounded-full hover:bg-secondary transition-colors"
+                      className="block text-center text-[15px] font-semibold text-primary border-2 border-primary py-2.5 rounded-full hover:bg-primary hover:text-primary-foreground transition-all"
                     >
                       For Parents
                     </Link>

@@ -27,9 +27,9 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {[
-            { icon: Envelope, label: "Email", value: "support@drawkao.com" },
-            { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
-            { icon: MapPin, label: "Location", value: "San Francisco, CA" },
+            { icon: Envelope, label: "Email", value: "drawkao@gmail.com" },
+            { icon: Phone, label: "Phone", value: "+92 300 1234567" },
+            { icon: MapPin, label: "Location", value: "Mohmand, Peshawar, Pakistan" },
           ].map((item, i) => (
             <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
               className="bg-card border border-border rounded-2xl p-5 text-center">
