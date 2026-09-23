@@ -12,7 +12,7 @@ export function Footer() {
     <footer className="bg-[#1b5e20] text-white relative">
       {/* Cream background + wavy top edge — skipped on home (FinalCta provides it) */}
       {!isHome && (
-        <div className="bg-[#f5f0e8] pt-16 sm:pt-20 pb-0 relative overflow-hidden">
+        <div className="bg-[#f5f0e8] dark:bg-[#1a2e1c] pt-16 sm:pt-20 pb-0 relative overflow-hidden">
           <div className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none">
             <svg viewBox="0 0 1440 70" fill="none" className="w-full h-12 sm:h-16 lg:h-20 block" preserveAspectRatio="none">
               <path d="M0 70 L0 40 Q100 5 200 30 Q300 55 400 35 Q500 15 600 40 Q700 65 800 35 Q900 5 1000 35 Q1100 65 1200 40 Q1300 15 1440 45 L1440 70 Z" fill="#1b5e20" />

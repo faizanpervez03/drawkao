@@ -6,7 +6,7 @@ export function FinalCta() {
   return (
     <section className="relative">
       {/* CTA Area with cream background */}
-      <div className="relative bg-[#f5f0e8] pt-14 sm:pt-20 pb-36 sm:pb-48 overflow-hidden">
+      <div className="relative bg-[#f5f0e8] dark:bg-[#1a2e1c] pt-14 sm:pt-20 pb-36 sm:pb-48 overflow-hidden">
         {/* Left side text - handwriting style */}
         <div className="absolute top-8 sm:top-12 left-[3%] sm:left-[6%] max-w-[160px] hidden sm:block z-10">
           <p className="text-primary font-bold text-base sm:text-lg leading-snug" style={{ fontFamily: "'Comic Sans MS', 'Segoe Print', cursive" }}>
@@ -23,12 +23,12 @@ export function FinalCta() {
 
         {/* Center content */}
         <div className="relative text-center px-4 max-w-xl mx-auto z-10">
-          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-[#1b5e20] mb-4 leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-[#1b5e20] dark:text-[#a5d6a7] mb-4 leading-tight">
             Let&apos;s Make Learning
             <br />
             More Colorful!
           </h2>
-          <p className="text-gray-500 text-sm sm:text-base mb-7 max-w-sm mx-auto leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base mb-7 max-w-sm mx-auto leading-relaxed">
             Join thousands of parents who trust Draw Kao to make learning fun, simple and meaningful.
           </p>
           <Link
