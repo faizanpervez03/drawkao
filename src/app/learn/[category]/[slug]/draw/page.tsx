@@ -34,6 +34,10 @@ const colors = [
   { name: "Brown", hex: "#795548" },
 ];
 
+const brushSizes = [6, 12, 22];
+
+const pencilCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'%3E%3Cpath d='M2 22l1-4L16 5l3 3L6 21l-4 1z' fill='%23ffd54f' stroke='%235d4037' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M2 22l4-1-3-3z' fill='%235d4037'/%3E%3C/svg%3E") 2 22, crosshair`;
+
 const steps = [
   { id: 1, label: "See & Hear", icon: Eye, description: "Look at the item and hear the word" },
   { id: 2, label: "Draw", icon: Pencil, description: "Trace or draw the item" },
@@ -51,6 +55,7 @@ export default function FruitDrawPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedColor, setSelectedColor] = useState("#e57373");
+  const [brushSize, setBrushSize] = useState(12);
   const [currentStep, setCurrentStep] = useState(1);
   const [strokes, setStrokes] = useState<ImageData[]>([]);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -126,7 +131,7 @@ export default function FruitDrawPage() {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.strokeStyle = currentStep === 3 ? selectedColor : "#333";
-    ctx.lineWidth = currentStep === 3 ? 12 : 6;
+    ctx.lineWidth = currentStep === 3 ? brushSize + 6 : brushSize;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
   };
@@ -215,65 +220,63 @@ export default function FruitDrawPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0]">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="h-[calc(100dvh-64px)] bg-[#f5f5f0] flex flex-col overflow-hidden">
+      {/* Header + Step Progress in one row */}
+      <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-2 shrink-0">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <Link
               href={`/learn/${category}/${slug}`}
-              className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors shrink-0"
             >
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
+              <ArrowLeft className="h-4 w-4 text-gray-600" />
             </Link>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-gray-800 truncate">
                 {steps[currentStep - 1].label}: {item.word} {item.emoji}
               </h1>
-              <p className="text-sm text-gray-500">{steps[currentStep - 1].description}</p>
             </div>
           </div>
+
+          {/* Step Progress */}
+          <div className="hidden sm:flex items-center justify-center gap-2">
+            {steps.map((step, i) => (
+              <div key={step.id} className="flex items-center">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs ${
+                  currentStep === step.id
+                    ? "bg-green-500 text-white font-bold"
+                    : currentStep > step.id
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-400"
+                }`}>
+                  {currentStep > step.id ? (
+                    <Check className="h-3.5 w-3.5" weight="bold" />
+                  ) : (
+                    <step.icon className="h-3.5 w-3.5" />
+                  )}
+                  <span className="hidden md:inline">{step.label}</span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={`w-5 h-0.5 mx-1 ${
+                    currentStep > step.id ? "bg-green-400" : "bg-gray-200"
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+
           <button
             onClick={() => speakWord(item.word)}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-2.5 rounded-full transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-1.5 rounded-full transition-colors shadow-sm text-sm shrink-0"
           >
-            <SpeakerHigh className="h-5 w-5" weight="fill" />
+            <SpeakerHigh className="h-4 w-4" weight="fill" />
             Listen
           </button>
         </div>
       </div>
 
-      {/* Step Progress */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="max-w-6xl mx-auto flex items-center justify-center gap-2">
-          {steps.map((step, i) => (
-            <div key={step.id} className="flex items-center">
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                currentStep === step.id
-                  ? "bg-green-500 text-white font-bold"
-                  : currentStep > step.id
-                  ? "bg-green-100 text-green-700"
-                  : "bg-gray-100 text-gray-400"
-              }`}>
-                {currentStep > step.id ? (
-                  <Check className="h-4 w-4" weight="bold" />
-                ) : (
-                  <step.icon className="h-4 w-4" />
-                )}
-                <span className="text-sm">{step.label}</span>
-              </div>
-              {i < steps.length - 1 && (
-                <div className={`w-8 h-0.5 mx-1 ${
-                  currentStep > step.id ? "bg-green-400" : "bg-gray-200"
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex-1 min-h-0 flex flex-col w-full">
         <AnimatePresence mode="wait">
           {/* Step 1: See & Hear */}
           {currentStep === 1 && (
@@ -282,14 +285,14 @@ export default function FruitDrawPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm text-center"
+              className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm text-center flex-1 min-h-0 flex flex-col items-center justify-center overflow-hidden"
             >
               <div
-                className="rounded-2xl py-16 mb-6 flex items-center justify-center"
+                className="rounded-2xl py-6 mb-4 flex items-center justify-center"
                 style={{ backgroundColor: item.bg_color || "#f5f5f5" }}
               >
                 <motion.span
-                  className="text-[160px]"
+                  className="text-[96px] sm:text-[140px]"
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 200 }}
@@ -297,9 +300,9 @@ export default function FruitDrawPage() {
                   {item.emoji}
                 </motion.span>
               </div>
-              <h2 className="text-4xl font-extrabold text-gray-800 mb-2">{item.word}</h2>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-2">{item.word}</h2>
               {item.pronunciation && (
-                <p className="text-lg text-gray-500 mb-4">{item.pronunciation}</p>
+                <p className="text-base sm:text-lg text-gray-500 mb-4">{item.pronunciation}</p>
               )}
               <button
                 onClick={() => speakWord(item.word)}
@@ -318,15 +321,32 @@ export default function FruitDrawPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
+              className="flex-1 min-h-0 flex flex-col"
             >
               {/* Canvas */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm mb-4">
-                <div className="relative bg-white rounded-lg overflow-hidden border border-gray-100">
+              <div className="bg-white rounded-2xl border border-gray-200 p-3 shadow-sm flex-1 min-h-0 flex flex-col">
+                <div className="relative flex-1 min-h-0 bg-white rounded-lg overflow-hidden border border-gray-100">
+                  {/* Brush size picker */}
+                  <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 bg-white/90 border border-gray-200 rounded-full px-2 py-1.5 shadow-sm">
+                    {brushSizes.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => setBrushSize(s)}
+                        title={`Size ${s === 6 ? "Small" : s === 12 ? "Medium" : "Large"}`}
+                        className={`flex items-center justify-center h-7 w-7 rounded-full transition-all ${
+                          brushSize === s ? "bg-green-100 ring-2 ring-green-500" : "hover:bg-gray-100"
+                        }`}
+                      >
+                        <span className="rounded-full bg-gray-700 block" style={{ width: Math.min(s, 16), height: Math.min(s, 16) }} />
+                      </button>
+                    ))}
+                  </div>
                   <canvas
                     ref={canvasRef}
                     width={800}
                     height={450}
-                    className="w-full h-auto cursor-crosshair"
+                    className="absolute inset-0 w-full h-full touch-none"
+                    style={{ cursor: pencilCursor }}
                     onMouseDown={startDrawing}
                     onMouseMove={draw}
                     onMouseUp={stopDrawing}
@@ -337,7 +357,7 @@ export default function FruitDrawPage() {
                   />
                   {/* Reference image */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15">
-                    <span className="text-[180px]">{item.emoji}</span>
+                    <span className="text-[140px]">{item.emoji}</span>
                   </div>
                 </div>
               </div>
@@ -347,7 +367,7 @@ export default function FruitDrawPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl border border-gray-200 px-5 py-4 shadow-sm mb-4"
+                  className="bg-white rounded-2xl border border-gray-200 px-5 py-3 shadow-sm mt-3 shrink-0"
                 >
                   <div className="flex items-center gap-3">
                     <Palette className="h-4 w-4 text-gray-500" />
@@ -372,7 +392,7 @@ export default function FruitDrawPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mt-3 shrink-0">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={undo}
