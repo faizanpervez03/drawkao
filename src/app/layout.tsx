@@ -40,6 +40,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Draw Kao" }],
   creator: "Draw Kao",
   publisher: "Draw Kao",
+  applicationName: "Draw Kao",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -88,6 +89,36 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Draw Kao",
+              alternateName: "DrawKao",
+              url: "https://drawkao.vercel.app",
+              applicationCategory: "EducationalApplication",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: "https://drawkao.vercel.app/learn?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Draw Kao",
+              url: "https://drawkao.vercel.app",
+              logo: "https://drawkao.vercel.app/images/DrawKao_Logo.png",
+            }),
+          }}
+        />
         <Script
           id="theme-script"
           strategy="beforeInteractive"
