@@ -1,0 +1,37 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Every 3rd day at 06:00 UTC - resets Supabase's 7-day inactivity timer
+    - cron: "0 6 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Query Supabase database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit PostgREST (counts as real database activity)
+        env:
+          SUPABASE_URL: https://vmzftqjvkacvexkmsznx.supabase.co
+          # Publishable key is public by design (it ships in the browser bundle)
+          PUBLISHABLE_KEY: sb_publishable_FaB2ob2LRGZEr5WQz1viFw_P7aqavS4
+        run: |
+          endpoint="${SUPABASE_URL}/rest/v1/categories?select=id&limit=1"
+          attempt=1
+          while [ "$attempt" -le 3 ]; do
+            code=$(curl -sS -o response.json -w "%{http_code}" \
+              -H "apikey: ${PUBLISHABLE_KEY}" \
+              -H "Authorization: Bearer ${PUBLISHABLE_KEY}" \
+              "$endpoint")
+            echo "attempt ${attempt}: HTTP ${code}"
+            if [ "$code" = "200" ]; then
+              echo "Database reachable - inactivity timer reset"
+              exit 0
+            fi
+            cat response.json 2>/dev/null || true
+            attempt=$((attempt + 1))
+            sleep 15
+          done
+          echo "Supabase unreachable - project may be paused again, or URL/key is wrong"
+          exit 1
